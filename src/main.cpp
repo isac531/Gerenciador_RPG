@@ -1,47 +1,9 @@
-#include <cctype>
 #include <iostream>
-#include <map>
 #include <sstream>
 #include <string>
-#include <utility>
 
-struct Usuario {
-    int id;
-    std::string nome;
-    std::string senha;
-};
-
-class GerenciadorUsuarios {
-public:
-    bool cadastrar(Usuario usuario) {
-        if (usuario.id <= 0 || !temConteudo(usuario.nome) ||
-            !temConteudo(usuario.senha)) {
-            return false;
-        }
-
-        return usuarios_.emplace(usuario.id, std::move(usuario)).second;
-    }
-
-    bool excluir(int id) {
-        return usuarios_.erase(id) > 0;
-    }
-
-    const std::map<int, Usuario>& listar() const {
-        return usuarios_;
-    }
-
-private:
-    static bool temConteudo(const std::string& texto) {
-        for (unsigned char caractere : texto) {
-            if (!std::isspace(caractere)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    std::map<int, Usuario> usuarios_;
-};
+#include "control/ControleCriarConta.h"
+#include "entity/Usuario.h"
 
 bool lerInteiro(const std::string& mensagem, int& valor) {
     std::cout << mensagem;
@@ -56,41 +18,48 @@ bool lerInteiro(const std::string& mensagem, int& valor) {
     return static_cast<bool>(entrada >> valor) && !(entrada >> caractereExtra);
 }
 
-bool cadastrarUsuario(GerenciadorUsuarios& gerenciador) {
+// Retorna false apenas quando a entrada padrao foi encerrada.
+bool cadastrarUsuario(ControleCriarConta& controle) {
     int id;
     if (!lerInteiro("ID: ", id)) {
         std::cout << "ID invalido.\n";
         return static_cast<bool>(std::cin);
     }
 
-    Usuario usuario{id, {}, {}};
+    std::string nome;
     std::cout << "Nome: ";
-    if (!std::getline(std::cin, usuario.nome)) {
+    if (!std::getline(std::cin, nome)) {
         return false;
     }
 
+    std::string senha;
     std::cout << "Senha: ";
-    if (!std::getline(std::cin, usuario.senha)) {
+    if (!std::getline(std::cin, senha)) {
         return false;
     }
 
-    if (gerenciador.cadastrar(std::move(usuario))) {
+    try {
+        controle.criarConta(Usuario(id, nome, senha));
         std::cout << "Usuario cadastrado com sucesso.\n";
-    } else {
-        std::cout << "Nao foi possivel cadastrar. Verifique os campos e se o ID ja existe.\n";
+    } catch (const LoginInvalidoException& e) {
+        std::cout << "Login invalido: " << e.what() << '\n';
+    } catch (const SenhaInvalidaException& e) {
+        std::cout << "Senha invalida: " << e.what() << '\n';
+    } catch (const std::exception& e) {
+        std::cout << "Nao foi possivel cadastrar: " << e.what() << '\n';
     }
 
     return true;
 }
 
-bool excluirUsuario(GerenciadorUsuarios& gerenciador) {
+bool excluirUsuario(ControleCriarConta& controle) {
     int id;
     if (!lerInteiro("ID do usuario: ", id)) {
         std::cout << "ID invalido.\n";
         return static_cast<bool>(std::cin);
     }
 
-    if (gerenciador.excluir(id)) {
+    if (controle.excluirConta(id)) {
         std::cout << "Usuario excluido com sucesso.\n";
     } else {
         std::cout << "Usuario nao encontrado.\n";
@@ -99,20 +68,20 @@ bool excluirUsuario(GerenciadorUsuarios& gerenciador) {
     return true;
 }
 
-void listarUsuarios(const GerenciadorUsuarios& gerenciador) {
-    if (gerenciador.listar().empty()) {
+void listarUsuarios(const ControleCriarConta& controle) {
+    if (controle.listar().empty()) {
         std::cout << "Nenhum usuario cadastrado.\n";
         return;
     }
 
-    for (const auto& entrada : gerenciador.listar()) {
-        std::cout << "ID: " << entrada.first << " | Nome: "
-                  << entrada.second.nome << '\n';
+    for (const auto& entrada : controle.listar()) {
+        std::cout << "ID: " << entrada.first
+                  << " | Nome: " << entrada.second.getNome() << '\n';
     }
 }
 
 int main() {
-    GerenciadorUsuarios gerenciador;
+    ControleCriarConta controle;
 
     while (true) {
         std::cout << "\n1. Cadastrar usuario\n"
@@ -131,17 +100,13 @@ int main() {
 
         switch (opcao) {
         case 1:
-            if (!cadastrarUsuario(gerenciador)) {
-                return 0;
-            }
+            if (!cadastrarUsuario(controle)) return 0;
             break;
         case 2:
-            if (!excluirUsuario(gerenciador)) {
-                return 0;
-            }
+            if (!excluirUsuario(controle)) return 0;
             break;
         case 3:
-            listarUsuarios(gerenciador);
+            listarUsuarios(controle);
             break;
         case 0:
             return 0;
