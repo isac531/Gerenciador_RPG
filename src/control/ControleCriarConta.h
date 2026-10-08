@@ -29,6 +29,8 @@ private:
     using Regras = std::vector<std::unique_ptr<IRegraValidacao>>;
 
     static void executar(const Regras& regras, const Usuario& usuario);
+    void carregarUsuarios();
+    void salvarUsuarios() const;
 
     std::map<int, Usuario> usuarios_;
     Regras regrasLogin_;
