@@ -1,8 +1,8 @@
 #include <iostream>
 #include <memory>
-#include <utility>
 
 #include "business/control/ControleCriarConta.h"
+#include "business/control/ControleUsuarios.h"
 #include "business/exception/Excecoes.h"
 #include "infra/FabricaRepositorio.h"
 #include "ui/MenuPrincipal.h"
@@ -33,8 +33,10 @@ int main() {
         return 0;  // Entrada encerrada antes da escolha.
     }
 
-    ControleCriarConta controle(montarRepositorio(*tipo));
-    MenuPrincipal menu(controle);
+    const auto repositorio = montarRepositorio(*tipo);
+    ControleCriarConta controleCriarConta(*repositorio);
+    ControleUsuarios controleUsuarios(*repositorio);
+    MenuPrincipal menu(controleCriarConta, controleUsuarios);
     menu.executar();
     return 0;
 }

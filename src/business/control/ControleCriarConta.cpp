@@ -1,23 +1,18 @@
 #include "ControleCriarConta.h"
 
-#include <stdexcept>
-#include <utility>
 
 #include "../validation/RegrasLogin.h"
 #include "../validation/RegrasSenha.h"
 
 // Para criar uma nova regra: implemente IRegraValidacao e registre aqui.
 // A ordem de registro define a ordem de execucao.
-ControleCriarConta::ControleCriarConta(std::unique_ptr<IUsuarioRepositorio> repositorio)
-    : repositorio_(std::move(repositorio)) {
-    if (!repositorio_) {
-        throw std::invalid_argument("O repositorio de usuarios nao pode ser nulo.");
-    }
+ControleCriarConta::ControleCriarConta(IUsuarioRepositorio& repositorio)
+    : repositorio_(repositorio) {
 
     regrasLogin_.push_back(std::make_unique<LoginVazioRegra>());
     regrasLogin_.push_back(std::make_unique<LoginLongoRegra>());
     regrasLogin_.push_back(std::make_unique<LoginComNumeroRegra>());
-    regrasLogin_.push_back(std::make_unique<LoginUnicoRegra>(*repositorio_));
+    regrasLogin_.push_back(std::make_unique<LoginUnicoRegra>(repositorio_));
 
     regrasSenha_.push_back(std::make_unique<SenhaTamanhoRegra>());
     regrasSenha_.push_back(std::make_unique<SenhaIgualUsuarioRegra>());
@@ -38,26 +33,21 @@ void ControleCriarConta::validaSenha(const Usuario& usuario) const {
     executar(regrasSenha_, usuario);
 }
 
-void ControleCriarConta::criarConta(const Usuario& usuario) {
+void ControleCriarConta::validaId(const Usuario& usuario) const {
     if (usuario.getId() <= 0) {
-        throw std::invalid_argument("O ID deve ser um numero positivo.");
+        throw IdInvalidoException("O ID deve ser um numero positivo.");
     }
-    if (repositorio_->existe(usuario.getId())) {
-        throw std::invalid_argument("Ja existe um usuario com esse ID.");
+    if (repositorio_.existe(usuario.getId())) {
+        throw IdInvalidoException("Ja existe um usuario com esse ID.");
     }
+}
 
+void ControleCriarConta::criarConta(const Usuario& usuario) {
+    validaId(usuario);
     validaLogin(usuario);
     validaSenha(usuario);
 
-    if (!repositorio_->adicionar(usuario)) {
-        throw std::invalid_argument("Ja existe um usuario com esse ID.");
+    if (!repositorio_.adicionar(usuario)) {
+        throw IdInvalidoException("Ja existe um usuario com esse ID.");
     }
-}
-
-bool ControleCriarConta::excluirConta(int id) {
-    return repositorio_->remover(id);
-}
-
-std::vector<Usuario> ControleCriarConta::listar() const {
-    return repositorio_->listarTodos();
 }

@@ -46,7 +46,9 @@ std::optional<TipoArmazenamento> MenuPrincipal::escolherArmazenamento() {
     }
 }
 
-MenuPrincipal::MenuPrincipal(ControleCriarConta& controle) : controle_(controle) {}
+MenuPrincipal::MenuPrincipal(ControleCriarConta& controleCriarConta,
+                             ControleUsuarios& controleUsuarios)
+    : controleCriarConta_(controleCriarConta), controleUsuarios_(controleUsuarios) {}
 
 void MenuPrincipal::executar() {
     while (true) {
@@ -110,16 +112,16 @@ bool MenuPrincipal::cadastrarUsuario() {
     }
 
     try {
-        controle_.criarConta(Usuario(id, login, senha, papel));
+        controleCriarConta_.criarConta(Usuario(id, login, senha, papel));
         std::cout << "Usuario cadastrado com sucesso.\n";
     } catch (const LoginInvalidoException& e) {
         std::cout << "Login invalido: " << e.what() << '\n';
     } catch (const SenhaInvalidaException& e) {
         std::cout << "Senha invalida: " << e.what() << '\n';
+    } catch (const IdInvalidoException& e) {
+        std::cout << "Nao foi possivel cadastrar: " << e.what() << '\n';
     } catch (const FalhaArmazenamentoException& e) {
         std::cout << "Falha no armazenamento: " << e.what() << '\n';
-    } catch (const std::exception& e) {
-        std::cout << "Nao foi possivel cadastrar: " << e.what() << '\n';
     }
 
     return true;
@@ -133,7 +135,7 @@ bool MenuPrincipal::excluirUsuario() {
     }
 
     try {
-        if (controle_.excluirConta(id)) {
+        if (controleUsuarios_.excluirConta(id)) {
             std::cout << "Usuario excluido com sucesso.\n";
         } else {
             std::cout << "Usuario nao encontrado.\n";
@@ -146,13 +148,7 @@ bool MenuPrincipal::excluirUsuario() {
 }
 
 void MenuPrincipal::listarUsuarios() const {
-    std::vector<Usuario> usuarios;
-    try {
-        usuarios = controle_.listar();
-    } catch (const FalhaArmazenamentoException& e) {
-        std::cout << "Falha no armazenamento: " << e.what() << '\n';
-        return;
-    }
+    const std::vector<Usuario> usuarios = controleUsuarios_.listar();
 
     if (usuarios.empty()) {
         std::cout << "Nenhum usuario cadastrado.\n";
