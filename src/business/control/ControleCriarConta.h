@@ -4,7 +4,7 @@
 #include <memory>
 #include <vector>
 
-#include "../entity/Usuario.h"
+#include "../model/Usuario.h"
 #include "../exception/Excecoes.h"
 #include "../validation/IRegraValidacao.h"
 

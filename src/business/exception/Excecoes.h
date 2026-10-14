@@ -13,7 +13,7 @@ public:
 class LoginLongoException : public LoginInvalidoException {
 public:
     LoginLongoException()
-        : LoginInvalidoException("Login muito longo (maximo 20 caracteres).") {}
+        : LoginInvalidoException("O login deve ter no maximo 12 caracteres.") {}
 };
 
 class LoginVazioException : public LoginInvalidoException {
@@ -38,7 +38,7 @@ public:
 class SenhaIgualUsuarioException : public SenhaInvalidaException {
 public:
     SenhaIgualUsuarioException()
-        : SenhaInvalidaException("A senha nao pode ser igual ao nome de usuario.") {}
+        : SenhaInvalidaException("A senha nao pode ser igual ao login.") {}
 };
 
 class SenhaCaracteresInsuficientesException : public SenhaInvalidaException {

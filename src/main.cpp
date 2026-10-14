@@ -2,8 +2,8 @@
 #include <sstream>
 #include <string>
 
-#include "control/ControleCriarConta.h"
-#include "entity/Usuario.h"
+#include "business/control/ControleCriarConta.h"
+#include "business/model/Usuario.h"
 
 bool lerInteiro(const std::string& mensagem, int& valor) {
     std::cout << mensagem;
@@ -26,9 +26,9 @@ bool cadastrarUsuario(ControleCriarConta& controle) {
         return static_cast<bool>(std::cin);
     }
 
-    std::string nome;
-    std::cout << "Nome: ";
-    if (!std::getline(std::cin, nome)) {
+    std::string login;
+    std::cout << "Login: ";
+    if (!std::getline(std::cin, login)) {
         return false;
     }
 
@@ -39,7 +39,7 @@ bool cadastrarUsuario(ControleCriarConta& controle) {
     }
 
     try {
-        controle.criarConta(Usuario(id, nome, senha));
+        controle.criarConta(Usuario(id, login, senha));
         std::cout << "Usuario cadastrado com sucesso.\n";
     } catch (const LoginInvalidoException& e) {
         std::cout << "Login invalido: " << e.what() << '\n';
@@ -76,7 +76,7 @@ void listarUsuarios(const ControleCriarConta& controle) {
 
     for (const auto& entrada : controle.listar()) {
         std::cout << "ID: " << entrada.first
-                  << " | Nome: " << entrada.second.getNome() << '\n';
+                  << " | Login: " << entrada.second.getLogin() << '\n';
     }
 }
 

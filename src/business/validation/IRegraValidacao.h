@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../entity/Usuario.h"
+#include "../model/Usuario.h"
 
 // Interface de uma regra de validacao de conta.
 // Cada regra concreta lanca a sua propria excecao quando e violada.

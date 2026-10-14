@@ -6,7 +6,7 @@
 #include "../exception/Excecoes.h"
 
 void LoginVazioRegra::validar(const Usuario& usuario) const {
-    const std::string& login = usuario.getNome();
+    const std::string& login = usuario.getLogin();
     bool vazio = std::all_of(login.begin(), login.end(), [](unsigned char c) {
         return std::isspace(c) != 0;
     });
@@ -18,13 +18,13 @@ void LoginVazioRegra::validar(const Usuario& usuario) const {
 LoginLongoRegra::LoginLongoRegra(std::size_t maximo) : maximo_(maximo) {}
 
 void LoginLongoRegra::validar(const Usuario& usuario) const {
-    if (usuario.getNome().size() > maximo_) {
+    if (usuario.getLogin().size() > maximo_) {
         throw LoginLongoException();
     }
 }
 
 void LoginComNumeroRegra::validar(const Usuario& usuario) const {
-    const std::string& login = usuario.getNome();
+    const std::string& login = usuario.getLogin();
     bool temNumero = std::any_of(login.begin(), login.end(), [](unsigned char c) {
         return std::isdigit(c) != 0;
     });
