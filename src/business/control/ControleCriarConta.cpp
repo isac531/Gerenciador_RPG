@@ -36,14 +36,14 @@ void ControleCriarConta::carregarUsuarios() {
 
         std::istringstream registro(linha);
         int id;
-        std::string nome;
+        std::string login;
         std::string senha;
         std::string dadoExtra;
-        if (!(registro >> id >> std::quoted(nome) >> std::quoted(senha)) ||
+        if (!(registro >> id >> std::quoted(login) >> std::quoted(senha)) ||
             (registro >> dadoExtra)) {
             throw std::runtime_error("Arquivo usuarios.txt contem um registro invalido.");
         }
-        if (id <= 0 || !usuarios_.emplace(id, Usuario(id, nome, senha)).second) {
+        if (id <= 0 || !usuarios_.emplace(id, Usuario(id, login, senha)).second) {
             throw std::runtime_error("Arquivo usuarios.txt contem um ID invalido ou duplicado.");
         }
     }
@@ -60,7 +60,7 @@ void ControleCriarConta::salvarUsuarios() const {
     }
 
     for (const auto& entrada : usuarios_) {
-        arquivo << entrada.first << ' ' << std::quoted(entrada.second.getNome()) << ' '
+        arquivo << entrada.first << ' ' << std::quoted(entrada.second.getLogin()) << ' '
                 << std::quoted(entrada.second.getSenha()) << '\n';
     }
 

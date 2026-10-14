@@ -16,7 +16,7 @@ void SenhaTamanhoRegra::validar(const Usuario& usuario) const {
 }
 
 void SenhaIgualUsuarioRegra::validar(const Usuario& usuario) const {
-    if (usuario.getSenha() == usuario.getNome()) {
+    if (usuario.getSenha() == usuario.getLogin()) {
         throw SenhaIgualUsuarioException();
     }
 }
