@@ -41,8 +41,16 @@ bool cadastrarUsuario(ControleCriarConta& controle) {
         return false;
     }
 
+    int codigoPapel;
+    Papel papel;
+    if (!lerInteiro("Papel (1. Mestre  2. Jogador): ", codigoPapel) ||
+        !papelDeCodigo(codigoPapel, papel)) {
+        std::cout << "Papel invalido.\n";
+        return static_cast<bool>(std::cin);
+    }
+
     try {
-        controle.criarConta(Usuario(id, login, senha));
+        controle.criarConta(Usuario(id, login, senha, papel));
         std::cout << "Usuario cadastrado com sucesso.\n";
     } catch (const LoginInvalidoException& e) {
         std::cout << "Login invalido: " << e.what() << '\n';
@@ -78,9 +86,11 @@ void listarUsuarios(const ControleCriarConta& controle) {
         return;
     }
 
+    // A senha nunca e exibida.
+    std::cout << "ID | Login | Papel\n";
     for (const Usuario& usuario : usuarios) {
-        std::cout << "ID: " << usuario.getId()
-                  << " | Login: " << usuario.getLogin() << '\n';
+        std::cout << usuario.getId() << " | " << usuario.getLogin() << " | "
+                  << papelParaTexto(usuario.getPapel()) << '\n';
     }
 }
 
