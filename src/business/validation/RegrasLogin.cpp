@@ -32,3 +32,14 @@ void LoginComNumeroRegra::validar(const Usuario& usuario) const {
         throw LoginComNumeroException();
     }
 }
+
+LoginUnicoRegra::LoginUnicoRegra(const IUsuarioRepositorio& repositorio)
+    : repositorio_(repositorio) {}
+
+void LoginUnicoRegra::validar(const Usuario& usuario) const {
+    for (const Usuario& existente : repositorio_.listarTodos()) {
+        if (existente.getLogin() == usuario.getLogin()) {
+            throw LoginEmUsoException();
+        }
+    }
+}

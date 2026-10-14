@@ -2,6 +2,7 @@
 
 #include <cstddef>
 
+#include "../repository/IUsuarioRepositorio.h"
 #include "IRegraValidacao.h"
 
 class LoginVazioRegra : public IRegraValidacao {
@@ -21,4 +22,14 @@ private:
 class LoginComNumeroRegra : public IRegraValidacao {
 public:
     void validar(const Usuario& usuario) const override;
+};
+
+// Recusa um login ja cadastrado (comparacao sensivel a maiusculas).
+class LoginUnicoRegra : public IRegraValidacao {
+public:
+    explicit LoginUnicoRegra(const IUsuarioRepositorio& repositorio);
+    void validar(const Usuario& usuario) const override;
+
+private:
+    const IUsuarioRepositorio& repositorio_;
 };
