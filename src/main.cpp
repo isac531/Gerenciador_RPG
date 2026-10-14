@@ -1,9 +1,12 @@
 #include <iostream>
 #include <sstream>
+#include <memory>
 #include <string>
+#include <vector>
 
 #include "business/control/ControleCriarConta.h"
 #include "business/model/Usuario.h"
+#include "infra/RepositorioMemoria.h"
 
 bool lerInteiro(const std::string& mensagem, int& valor) {
     std::cout << mensagem;
@@ -38,8 +41,16 @@ bool cadastrarUsuario(ControleCriarConta& controle) {
         return false;
     }
 
+    int codigoPapel;
+    Papel papel;
+    if (!lerInteiro("Papel (1. Mestre  2. Jogador): ", codigoPapel) ||
+        !papelDeCodigo(codigoPapel, papel)) {
+        std::cout << "Papel invalido.\n";
+        return static_cast<bool>(std::cin);
+    }
+
     try {
-        controle.criarConta(Usuario(id, login, senha));
+        controle.criarConta(Usuario(id, login, senha, papel));
         std::cout << "Usuario cadastrado com sucesso.\n";
     } catch (const LoginInvalidoException& e) {
         std::cout << "Login invalido: " << e.what() << '\n';
@@ -69,19 +80,22 @@ bool excluirUsuario(ControleCriarConta& controle) {
 }
 
 void listarUsuarios(const ControleCriarConta& controle) {
-    if (controle.listar().empty()) {
+    const std::vector<Usuario> usuarios = controle.listar();
+    if (usuarios.empty()) {
         std::cout << "Nenhum usuario cadastrado.\n";
         return;
     }
 
-    for (const auto& entrada : controle.listar()) {
-        std::cout << "ID: " << entrada.first
-                  << " | Login: " << entrada.second.getLogin() << '\n';
+    // A senha nunca e exibida.
+    std::cout << "ID | Login | Papel\n";
+    for (const Usuario& usuario : usuarios) {
+        std::cout << usuario.getId() << " | " << usuario.getLogin() << " | "
+                  << papelParaTexto(usuario.getPapel()) << '\n';
     }
 }
 
 int main() {
-    ControleCriarConta controle;
+    ControleCriarConta controle(std::make_unique<RepositorioMemoria>());
 
     while (true) {
         std::cout << "\n1. Cadastrar usuario\n"

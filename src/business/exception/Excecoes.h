@@ -52,3 +52,12 @@ public:
     SenhaTamanhoInvalidoException()
         : SenhaInvalidaException("A senha deve ter entre 8 e 128 caracteres.") {}
 };
+
+// ---------- Excecoes de armazenamento ----------
+// Equivalente a IOException do Java: qualquer falha de leitura, gravacao
+// ou arquivo corrompido nos repositorios e relancada com este tipo.
+class FalhaArmazenamentoException : public std::runtime_error {
+public:
+    explicit FalhaArmazenamentoException(const std::string& mensagem)
+        : std::runtime_error(mensagem) {}
+};
