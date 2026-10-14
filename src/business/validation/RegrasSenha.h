@@ -4,9 +4,15 @@
 
 #include "IRegraValidacao.h"
 
+// Politica de senha padrao do AWS IAM (RF03).
+constexpr std::size_t TAMANHO_MINIMO_SENHA = 8;
+constexpr std::size_t TAMANHO_MAXIMO_SENHA = 128;
+constexpr int MINIMO_TIPOS_CARACTERE_SENHA = 3;
+
 class SenhaTamanhoRegra : public IRegraValidacao {
 public:
-    SenhaTamanhoRegra(std::size_t minimo = 8, std::size_t maximo = 128);
+    SenhaTamanhoRegra(std::size_t minimo = TAMANHO_MINIMO_SENHA,
+                      std::size_t maximo = TAMANHO_MAXIMO_SENHA);
     void validar(const Usuario& usuario) const override;
 
 private:
@@ -23,7 +29,7 @@ public:
 // maiusculas, minusculas, numeros e especiais ! @ # $ % ^ & * ( ) _ + - = [ ] { } | '
 class SenhaCaracteresRegra : public IRegraValidacao {
 public:
-    explicit SenhaCaracteresRegra(int minimoTipos = 3);
+    explicit SenhaCaracteresRegra(int minimoTipos = MINIMO_TIPOS_CARACTERE_SENHA);
     void validar(const Usuario& usuario) const override;
 
 private:

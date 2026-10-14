@@ -7,7 +7,6 @@
 
 #include "../business/exception/Excecoes.h"
 #include "../business/model/Papel.h"
-#include "../infra/FabricaRepositorio.h"
 
 bool MenuPrincipal::lerInteiro(const std::string& mensagem, int& valor) {
     std::cout << mensagem;
@@ -22,7 +21,7 @@ bool MenuPrincipal::lerInteiro(const std::string& mensagem, int& valor) {
     return static_cast<bool>(entrada >> valor) && !(entrada >> caractereExtra);
 }
 
-std::unique_ptr<IUsuarioRepositorio> MenuPrincipal::escolherArmazenamento() {
+std::optional<TipoArmazenamento> MenuPrincipal::escolherArmazenamento() {
     while (true) {
         int opcao;
         if (!lerInteiro("Escolha o armazenamento:\n"
@@ -31,33 +30,25 @@ std::unique_ptr<IUsuarioRepositorio> MenuPrincipal::escolherArmazenamento() {
                         "Opcao: ",
                         opcao)) {
             if (!std::cin) {
-                return nullptr;
+                return std::nullopt;
             }
             std::cout << "Opcao invalida.\n";
             continue;
         }
 
         if (opcao == 1) {
-            std::cout << "Usando armazenamento em memoria (RAM).\n";
-            return criarRepositorio(TipoArmazenamento::MEMORIA);
+            return TipoArmazenamento::MEMORIA;
         }
         if (opcao == 2) {
-            try {
-                auto repositorio = criarRepositorio(TipoArmazenamento::ARQUIVO_BINARIO);
-                std::cout << "Usando arquivo binario usuarios.dat.\n";
-                return repositorio;
-            } catch (const FalhaArmazenamentoException& e) {
-                std::cout << "Falha no armazenamento: " << e.what() << '\n'
-                          << "Usando armazenamento em memoria (RAM); "
-                             "os dados nao serao salvos.\n";
-                return criarRepositorio(TipoArmazenamento::MEMORIA);
-            }
+            return TipoArmazenamento::ARQUIVO_BINARIO;
         }
         std::cout << "Opcao invalida.\n";
     }
 }
 
-MenuPrincipal::MenuPrincipal(ControleCriarConta& controle) : controle_(controle) {}
+MenuPrincipal::MenuPrincipal(ControleCriarConta& controleCriarConta,
+                             ControleUsuarios& controleUsuarios)
+    : controleCriarConta_(controleCriarConta), controleUsuarios_(controleUsuarios) {}
 
 void MenuPrincipal::executar() {
     while (true) {
@@ -121,16 +112,16 @@ bool MenuPrincipal::cadastrarUsuario() {
     }
 
     try {
-        controle_.criarConta(Usuario(id, login, senha, papel));
+        controleCriarConta_.criarConta(Usuario(id, login, senha, papel));
         std::cout << "Usuario cadastrado com sucesso.\n";
     } catch (const LoginInvalidoException& e) {
         std::cout << "Login invalido: " << e.what() << '\n';
     } catch (const SenhaInvalidaException& e) {
         std::cout << "Senha invalida: " << e.what() << '\n';
+    } catch (const IdInvalidoException& e) {
+        std::cout << "Nao foi possivel cadastrar: " << e.what() << '\n';
     } catch (const FalhaArmazenamentoException& e) {
         std::cout << "Falha no armazenamento: " << e.what() << '\n';
-    } catch (const std::exception& e) {
-        std::cout << "Nao foi possivel cadastrar: " << e.what() << '\n';
     }
 
     return true;
@@ -144,7 +135,7 @@ bool MenuPrincipal::excluirUsuario() {
     }
 
     try {
-        if (controle_.excluirConta(id)) {
+        if (controleUsuarios_.excluirConta(id)) {
             std::cout << "Usuario excluido com sucesso.\n";
         } else {
             std::cout << "Usuario nao encontrado.\n";
@@ -157,13 +148,7 @@ bool MenuPrincipal::excluirUsuario() {
 }
 
 void MenuPrincipal::listarUsuarios() const {
-    std::vector<Usuario> usuarios;
-    try {
-        usuarios = controle_.listar();
-    } catch (const FalhaArmazenamentoException& e) {
-        std::cout << "Falha no armazenamento: " << e.what() << '\n';
-        return;
-    }
+    const std::vector<Usuario> usuarios = controleUsuarios_.listar();
 
     if (usuarios.empty()) {
         std::cout << "Nenhum usuario cadastrado.\n";
