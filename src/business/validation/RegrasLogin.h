@@ -5,6 +5,8 @@
 #include "../repository/IUsuarioRepositorio.h"
 #include "IRegraValidacao.h"
 
+constexpr std::size_t TAMANHO_MAXIMO_LOGIN = 12;
+
 class LoginVazioRegra : public IRegraValidacao {
 public:
     void validar(const Usuario& usuario) const override;
@@ -12,7 +14,7 @@ public:
 
 class LoginLongoRegra : public IRegraValidacao {
 public:
-    explicit LoginLongoRegra(std::size_t maximo = 12);
+    explicit LoginLongoRegra(std::size_t maximo = TAMANHO_MAXIMO_LOGIN);
     void validar(const Usuario& usuario) const override;
 
 private:
