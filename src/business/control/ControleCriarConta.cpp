@@ -17,6 +17,7 @@ ControleCriarConta::ControleCriarConta(std::unique_ptr<IUsuarioRepositorio> repo
     regrasLogin_.push_back(std::make_unique<LoginVazioRegra>());
     regrasLogin_.push_back(std::make_unique<LoginLongoRegra>());
     regrasLogin_.push_back(std::make_unique<LoginComNumeroRegra>());
+    regrasLogin_.push_back(std::make_unique<LoginUnicoRegra>(*repositorio_));
 
     regrasSenha_.push_back(std::make_unique<SenhaTamanhoRegra>());
     regrasSenha_.push_back(std::make_unique<SenhaIgualUsuarioRegra>());

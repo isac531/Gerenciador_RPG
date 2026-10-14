@@ -28,6 +28,12 @@ public:
         : LoginInvalidoException("O login nao pode conter numeros.") {}
 };
 
+class LoginEmUsoException : public LoginInvalidoException {
+public:
+    LoginEmUsoException()
+        : LoginInvalidoException("Login ja esta em uso.") {}
+};
+
 // ---------- Excecoes de senha (SenhaInvalidaException) ----------
 class SenhaInvalidaException : public std::runtime_error {
 public:
