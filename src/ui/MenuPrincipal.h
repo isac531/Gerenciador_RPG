@@ -1,18 +1,17 @@
 #pragma once
 
-#include <memory>
+#include <optional>
 #include <string>
 
 #include "../business/control/ControleCriarConta.h"
-#include "../business/repository/IUsuarioRepositorio.h"
+#include "../business/repository/TipoArmazenamento.h"
 
 // Interface de console: le a entrada do usuario e chama o controle.
 class MenuPrincipal {
 public:
-    // Pergunta qual armazenamento usar e o constroi. Se o arquivo binario
-    // falhar, informa o erro e usa a memoria (RAM).
-    // Retorna nullptr apenas se a entrada padrao for encerrada.
-    static std::unique_ptr<IUsuarioRepositorio> escolherArmazenamento();
+    // Pergunta qual armazenamento usar.
+    // Retorna std::nullopt apenas se a entrada padrao for encerrada.
+    static std::optional<TipoArmazenamento> escolherArmazenamento();
 
     explicit MenuPrincipal(ControleCriarConta& controle);
 

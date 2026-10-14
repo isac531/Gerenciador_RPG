@@ -7,7 +7,6 @@
 
 #include "../business/exception/Excecoes.h"
 #include "../business/model/Papel.h"
-#include "../infra/FabricaRepositorio.h"
 
 bool MenuPrincipal::lerInteiro(const std::string& mensagem, int& valor) {
     std::cout << mensagem;
@@ -22,7 +21,7 @@ bool MenuPrincipal::lerInteiro(const std::string& mensagem, int& valor) {
     return static_cast<bool>(entrada >> valor) && !(entrada >> caractereExtra);
 }
 
-std::unique_ptr<IUsuarioRepositorio> MenuPrincipal::escolherArmazenamento() {
+std::optional<TipoArmazenamento> MenuPrincipal::escolherArmazenamento() {
     while (true) {
         int opcao;
         if (!lerInteiro("Escolha o armazenamento:\n"
@@ -31,27 +30,17 @@ std::unique_ptr<IUsuarioRepositorio> MenuPrincipal::escolherArmazenamento() {
                         "Opcao: ",
                         opcao)) {
             if (!std::cin) {
-                return nullptr;
+                return std::nullopt;
             }
             std::cout << "Opcao invalida.\n";
             continue;
         }
 
         if (opcao == 1) {
-            std::cout << "Usando armazenamento em memoria (RAM).\n";
-            return criarRepositorio(TipoArmazenamento::MEMORIA);
+            return TipoArmazenamento::MEMORIA;
         }
         if (opcao == 2) {
-            try {
-                auto repositorio = criarRepositorio(TipoArmazenamento::ARQUIVO_BINARIO);
-                std::cout << "Usando arquivo binario usuarios.dat.\n";
-                return repositorio;
-            } catch (const FalhaArmazenamentoException& e) {
-                std::cout << "Falha no armazenamento: " << e.what() << '\n'
-                          << "Usando armazenamento em memoria (RAM); "
-                             "os dados nao serao salvos.\n";
-                return criarRepositorio(TipoArmazenamento::MEMORIA);
-            }
+            return TipoArmazenamento::ARQUIVO_BINARIO;
         }
         std::cout << "Opcao invalida.\n";
     }
