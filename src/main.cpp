@@ -2,8 +2,8 @@
 #include <sstream>
 #include <string>
 
-#include "control/ControleCriarConta.h"
-#include "entity/Usuario.h"
+#include "business/control/ControleCriarConta.h"
+#include "business/model/Usuario.h"
 
 bool lerInteiro(const std::string& mensagem, int& valor) {
     std::cout << mensagem;
