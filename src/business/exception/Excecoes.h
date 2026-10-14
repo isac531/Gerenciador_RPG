@@ -67,3 +67,11 @@ public:
     explicit FalhaArmazenamentoException(const std::string& mensagem)
         : std::runtime_error(mensagem) {}
 };
+
+// ---------- Excecao de identificador (IdInvalidoException) ----------
+// ID nao positivo ou ja usado por outro usuario.
+class IdInvalidoException : public std::runtime_error {
+public:
+    explicit IdInvalidoException(const std::string& mensagem)
+        : std::runtime_error(mensagem) {}
+};
