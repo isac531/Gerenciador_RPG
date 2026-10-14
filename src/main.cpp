@@ -1,9 +1,12 @@
 #include <iostream>
 #include <sstream>
+#include <memory>
 #include <string>
+#include <vector>
 
 #include "business/control/ControleCriarConta.h"
 #include "business/model/Usuario.h"
+#include "infra/RepositorioMemoria.h"
 
 bool lerInteiro(const std::string& mensagem, int& valor) {
     std::cout << mensagem;
@@ -69,19 +72,20 @@ bool excluirUsuario(ControleCriarConta& controle) {
 }
 
 void listarUsuarios(const ControleCriarConta& controle) {
-    if (controle.listar().empty()) {
+    const std::vector<Usuario> usuarios = controle.listar();
+    if (usuarios.empty()) {
         std::cout << "Nenhum usuario cadastrado.\n";
         return;
     }
 
-    for (const auto& entrada : controle.listar()) {
-        std::cout << "ID: " << entrada.first
-                  << " | Login: " << entrada.second.getLogin() << '\n';
+    for (const Usuario& usuario : usuarios) {
+        std::cout << "ID: " << usuario.getId()
+                  << " | Login: " << usuario.getLogin() << '\n';
     }
 }
 
 int main() {
-    ControleCriarConta controle;
+    ControleCriarConta controle(std::make_unique<RepositorioMemoria>());
 
     while (true) {
         std::cout << "\n1. Cadastrar usuario\n"
