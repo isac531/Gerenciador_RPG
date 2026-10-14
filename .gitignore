@@ -9,4 +9,5 @@ test_runner
 
 # Dados gerados em tempo de execucao
 usuarios.dat
+usuarios.dat.tmp
 usuarios.txt
