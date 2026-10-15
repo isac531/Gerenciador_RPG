@@ -1,0 +1,30 @@
+@startuml casos-de-uso-geral
+!pragma layout smetana
+left to right direction
+skinparam packageStyle rectangle
+
+actor Mestre
+actor Jogador
+
+rectangle "Gerenciador de RPG" {
+  usecase "UC02 Fazer login" as UC02
+  usecase "UC05 Gerenciar campanha" as UC05
+  usecase "UC06 Usar escudo do mestre" as UC06
+  usecase "UC07 Gerenciar personagens" as UC07
+  usecase "UC08 Fazer rolagem" as UC08
+  usecase "UC09 Entrar em campanha" as UC09
+  usecase "UC10 Associar personagem" as UC10
+  usecase "UC11 Gerenciar NPCs" as UC11
+}
+
+Mestre --> UC02
+Mestre --> UC05
+Mestre --> UC07
+Mestre --> UC11
+Jogador --> UC02
+Jogador --> UC07
+Jogador --> UC09
+UC06 .> UC05 : <<extend>>
+UC08 .> UC07 : <<extend>>
+UC09 .> UC10 : <<include>>
+@enduml

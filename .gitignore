@@ -1,0 +1,13 @@
+# Executaveis
+rpg
+rpg.exe
+*.exe
+test_runner
+
+# Objetos de compilacao
+*.o
+
+# Dados gerados em tempo de execucao
+usuarios.dat
+usuarios.dat.tmp
+usuarios.txt

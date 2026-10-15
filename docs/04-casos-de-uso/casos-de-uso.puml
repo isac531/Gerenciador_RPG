@@ -1,0 +1,24 @@
+@startuml casos-de-uso
+!pragma layout smetana
+left to right direction
+skinparam packageStyle rectangle
+
+actor Visitante
+actor "Usuário" as Usuario
+actor Mestre
+actor Jogador
+Usuario <|-- Mestre
+Usuario <|-- Jogador
+
+rectangle "Gerenciador de RPG: gerenciamento de usuários" {
+  usecase "UC01 Criar conta" as UC01
+  usecase "UC02 Fazer login" as UC02
+  usecase "UC03 Listar usuários" as UC03
+  usecase "UC04 Excluir conta" as UC04
+}
+
+Visitante --> UC01
+Usuario --> UC02
+Usuario --> UC03
+Usuario --> UC04
+@enduml
