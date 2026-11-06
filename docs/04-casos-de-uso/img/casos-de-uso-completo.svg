@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1275" viewBox="0 0 1000 1275" font-family="Helvetica, Arial, sans-serif" font-size="14">
+<defs><marker id="seta" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="9" markerHeight="9" orient="auto"><path d="M0,0 L10,5 L0,10" fill="none" stroke="#333"/></marker><marker id="gen" viewBox="0 0 12 12" refX="12" refY="6" markerWidth="14" markerHeight="14" orient="auto"><path d="M0,0 L12,6 L0,12 Z" fill="#fff" stroke="#333"/></marker></defs>
+<rect width="1000" height="1275" fill="#fff"/>
+<rect x="460" y="20" width="520" height="1235" fill="#fafafa" stroke="#333" stroke-width="1.5"/>
+<text x="720" y="48" text-anchor="middle" font-weight="bold" font-size="17">Gerenciador de RPG</text>
+<rect x="480" y="70" width="480" height="281" fill="#eef3fb" stroke="#7a8db3" rx="4"/>
+<text x="494" y="92" font-weight="bold" fill="#33476b">Usuários (Sprints 1 e 2)</text>
+<rect x="480" y="403" width="480" height="343" fill="#eef3fb" stroke="#7a8db3" rx="4"/>
+<text x="494" y="425" font-weight="bold" fill="#33476b">Personagens (Sprint 3)</text>
+<rect x="480" y="798" width="480" height="405" fill="#eef3fb" stroke="#7a8db3" rx="4"/>
+<text x="494" y="820" font-weight="bold" fill="#33476b">Campanhas (próximas entregas)</text>
+<line x1="132" y1="106" x2="545" y2="120" stroke="#555" stroke-width="1.2"/>
+<line x1="172" y1="427" x2="545" y2="182" stroke="#555" stroke-width="1.2"/>
+<line x1="172" y1="427" x2="545" y2="244" stroke="#555" stroke-width="1.2"/>
+<line x1="172" y1="427" x2="545" y2="306" stroke="#555" stroke-width="1.2"/>
+<line x1="172" y1="427" x2="545" y2="453" stroke="#555" stroke-width="1.2"/>
+<line x1="172" y1="427" x2="545" y2="515" stroke="#555" stroke-width="1.2"/>
+<line x1="172" y1="427" x2="545" y2="577" stroke="#555" stroke-width="1.2"/>
+<line x1="172" y1="427" x2="545" y2="639" stroke="#555" stroke-width="1.2"/>
+<line x1="172" y1="427" x2="545" y2="701" stroke="#555" stroke-width="1.2"/>
+<line x1="172" y1="427" x2="545" y2="972" stroke="#555" stroke-width="1.2"/>
+<line x1="112" y1="1084" x2="545" y2="848" stroke="#555" stroke-width="1.2"/>
+<line x1="112" y1="1084" x2="545" y2="1158" stroke="#555" stroke-width="1.2"/>
+<line x1="252" y1="1084" x2="545" y2="1034" stroke="#555" stroke-width="1.2"/>
+<ellipse cx="720" cy="120" rx="175" ry="24" fill="#fffbe6" stroke="#8a7a2c" stroke-width="1.3"/>
+<text x="720" y="118" text-anchor="middle"><tspan font-weight="bold">UC01</tspan> Criar conta</text>
+<text x="720" y="135" text-anchor="middle" font-size="12" fill="#555">RF01, RF02, RF03</text>
+<ellipse cx="720" cy="182" rx="175" ry="24" fill="#fffbe6" stroke="#8a7a2c" stroke-width="1.3"/>
+<text x="720" y="180" text-anchor="middle"><tspan font-weight="bold">UC02</tspan> Fazer login</text>
+<text x="720" y="197" text-anchor="middle" font-size="12" fill="#555">RF07</text>
+<ellipse cx="720" cy="244" rx="175" ry="24" fill="#fffbe6" stroke="#8a7a2c" stroke-width="1.3"/>
+<text x="720" y="242" text-anchor="middle"><tspan font-weight="bold">UC03</tspan> Listar usuários</text>
+<text x="720" y="259" text-anchor="middle" font-size="12" fill="#555">RF04</text>
+<ellipse cx="720" cy="306" rx="175" ry="24" fill="#fffbe6" stroke="#8a7a2c" stroke-width="1.3"/>
+<text x="720" y="304" text-anchor="middle"><tspan font-weight="bold">UC04</tspan> Excluir conta</text>
+<text x="720" y="321" text-anchor="middle" font-size="12" fill="#555">RF06</text>
+<ellipse cx="720" cy="453" rx="175" ry="24" fill="#fffbe6" stroke="#8a7a2c" stroke-width="1.3"/>
+<text x="720" y="451" text-anchor="middle"><tspan font-weight="bold">UC07</tspan> Criar personagem</text>
+<text x="720" y="468" text-anchor="middle" font-size="12" fill="#555">RF08</text>
+<ellipse cx="720" cy="515" rx="175" ry="24" fill="#fffbe6" stroke="#8a7a2c" stroke-width="1.3"/>
+<text x="720" y="513" text-anchor="middle"><tspan font-weight="bold">UC12</tspan> Editar ficha do personagem</text>
+<text x="720" y="530" text-anchor="middle" font-size="12" fill="#555">RF10</text>
+<ellipse cx="720" cy="577" rx="175" ry="24" fill="#fffbe6" stroke="#8a7a2c" stroke-width="1.3"/>
+<text x="720" y="575" text-anchor="middle"><tspan font-weight="bold">UC13</tspan> Listar personagens</text>
+<text x="720" y="592" text-anchor="middle" font-size="12" fill="#555">RF09</text>
+<ellipse cx="720" cy="639" rx="175" ry="24" fill="#fffbe6" stroke="#8a7a2c" stroke-width="1.3"/>
+<text x="720" y="637" text-anchor="middle"><tspan font-weight="bold">UC14</tspan> Excluir personagem</text>
+<text x="720" y="654" text-anchor="middle" font-size="12" fill="#555">RF11</text>
+<ellipse cx="720" cy="701" rx="175" ry="24" fill="#fffbe6" stroke="#8a7a2c" stroke-width="1.3"/>
+<text x="720" y="699" text-anchor="middle"><tspan font-weight="bold">UC15</tspan> Consultar quantidade de entidades</text>
+<text x="720" y="716" text-anchor="middle" font-size="12" fill="#555">RF12</text>
+<ellipse cx="720" cy="848" rx="175" ry="24" fill="#fffbe6" stroke="#8a7a2c" stroke-width="1.3"/>
+<text x="720" y="853" text-anchor="middle"><tspan font-weight="bold">UC05</tspan> Gerenciar campanha</text>
+<ellipse cx="720" cy="910" rx="175" ry="24" fill="#fffbe6" stroke="#8a7a2c" stroke-width="1.3"/>
+<text x="720" y="915" text-anchor="middle"><tspan font-weight="bold">UC06</tspan> Usar escudo do mestre</text>
+<ellipse cx="720" cy="972" rx="175" ry="24" fill="#fffbe6" stroke="#8a7a2c" stroke-width="1.3"/>
+<text x="720" y="977" text-anchor="middle"><tspan font-weight="bold">UC08</tspan> Fazer rolagem</text>
+<ellipse cx="720" cy="1034" rx="175" ry="24" fill="#fffbe6" stroke="#8a7a2c" stroke-width="1.3"/>
+<text x="720" y="1039" text-anchor="middle"><tspan font-weight="bold">UC09</tspan> Entrar em campanha</text>
+<ellipse cx="720" cy="1096" rx="175" ry="24" fill="#fffbe6" stroke="#8a7a2c" stroke-width="1.3"/>
+<text x="720" y="1101" text-anchor="middle"><tspan font-weight="bold">UC10</tspan> Associar personagem</text>
+<ellipse cx="720" cy="1158" rx="175" ry="24" fill="#fffbe6" stroke="#8a7a2c" stroke-width="1.3"/>
+<text x="720" y="1163" text-anchor="middle"><tspan font-weight="bold">UC11</tspan> Gerenciar NPCs</text>
+<g stroke="#333" stroke-width="1.6" fill="none"><circle cx="110" cy="82" r="11" fill="#fff"/><line x1="110" y1="93" x2="110" y2="122"/><line x1="92" y1="104" x2="128" y2="104"/><line x1="110" y1="122" x2="96" y2="144"/><line x1="110" y1="122" x2="124" y2="144"/></g>
+<text x="110" y="164" text-anchor="middle">Visitante</text>
+<g stroke="#333" stroke-width="1.6" fill="none"><circle cx="150" cy="403" r="11" fill="#fff"/><line x1="150" y1="414" x2="150" y2="443"/><line x1="132" y1="425" x2="168" y2="425"/><line x1="150" y1="443" x2="136" y2="465"/><line x1="150" y1="443" x2="164" y2="465"/></g>
+<text x="150" y="485" text-anchor="middle">Usuário</text>
+<g stroke="#333" stroke-width="1.6" fill="none"><circle cx="90" cy="1060" r="11" fill="#fff"/><line x1="90" y1="1071" x2="90" y2="1100"/><line x1="72" y1="1082" x2="108" y2="1082"/><line x1="90" y1="1100" x2="76" y2="1122"/><line x1="90" y1="1100" x2="104" y2="1122"/></g>
+<text x="90" y="1142" text-anchor="middle">Mestre</text>
+<g stroke="#333" stroke-width="1.6" fill="none"><circle cx="230" cy="1060" r="11" fill="#fff"/><line x1="230" y1="1071" x2="230" y2="1100"/><line x1="212" y1="1082" x2="248" y2="1082"/><line x1="230" y1="1100" x2="216" y2="1122"/><line x1="230" y1="1100" x2="244" y2="1122"/></g>
+<text x="230" y="1142" text-anchor="middle">Jogador</text>
+<line x1="90" y1="1046" x2="150" y2="511" stroke="#333" stroke-width="1.3" marker-end="url(#gen)"/>
+<line x1="230" y1="1046" x2="150" y2="511" stroke="#333" stroke-width="1.3" marker-end="url(#gen)"/>
+<path d="M875,890 C955,910 955,848 875,868" fill="none" stroke="#333" stroke-dasharray="6,4" marker-end="url(#seta)"/>
+<text x="943" y="884" font-size="12">«extend»</text>
+<path d="M875,1054 C955,1034 955,1096 875,1076" fill="none" stroke="#333" stroke-dasharray="6,4" marker-end="url(#seta)"/>
+<text x="943" y="1070" font-size="12">«include»</text>
+<text x="30" y="1235" font-size="12" fill="#444">Todos os casos de uso, exceto UC01, pressupõem UC02 (Fazer login).</text>
+<text x="30" y="1253" font-size="12" fill="#444">RF05 (escolher o armazenamento) vale para todos os casos de uso.</text>
+</svg>

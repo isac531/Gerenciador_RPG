@@ -1,7 +1,7 @@
 # Casos de uso
 
 > Seção 6 do modelo. Os **requisitos** (RF) e seus **cenários de aceitação** estão em `openspec/specs/`.
-> Aqui ficam o diagrama do **gerenciamento de usuários** (Sprint 1, núcleo da Entrega 1), o diagrama geral do sistema e a descrição detalhada dos casos de uso mais importantes.
+> Aqui ficam o diagrama do gerenciamento de usuários, o diagrama completo do sistema e a descrição detalhada dos três casos de uso mais relevantes: UC01 (usuários) e UC07 e UC12 (personagem, a entidade da Sprint 3).
 
 ## 6.1 Diagrama de casos de uso: gerenciamento de usuários (S1.1)
 
@@ -13,13 +13,13 @@ Dois tipos de usuário, **Mestre** e **Jogador**, especializam o ator **Usuário
 >
 > O armazenamento (memória ou arquivo binário, RF05) é escolhido ao iniciar o sistema e vale para todos os casos de uso; por isso não aparece como caso de uso separado.
 
-## 6.2 Diagrama geral do sistema
+## 6.2 Diagrama de casos de uso completo
 
-Visão de todas as funcionalidades previstas. Só o gerenciamento de usuários é detalhado nesta entrega; os demais casos de uso entram nas próximas sprints. Fonte em PlantUML: [`casos-de-uso-geral.puml`](casos-de-uso-geral.puml). Versão original da Sprint 1: [`../diagramas/CasosDeUso-geral.pdf`](../diagramas/CasosDeUso-geral.pdf).
+Todos os casos de uso do sistema, com os requisitos funcionais de cada um (RF01 a RF12). Os casos de uso de campanhas ainda não têm requisitos detalhados (ver visão §2.3 e o [cronograma](../00-entregas.md)). Fonte: [`img/casos-de-uso-completo.svg`](img/casos-de-uso-completo.svg). Versão original da Sprint 1: [`../diagramas/CasosDeUso-geral.pdf`](../diagramas/CasosDeUso-geral.pdf).
 
-![Diagrama de casos de uso geral](img/casos-de-uso-geral.png)
+![Diagrama de casos de uso completo](img/casos-de-uso-completo.png)
 
-> Todos os casos de uso, exceto UC01, pressupõem UC02 (Fazer login).
+> Na Sprint 3, o antigo "UC07 Gerenciar personagens" foi dividido em UC07 Criar personagem, UC12 Editar ficha, UC13 Listar personagens e UC14 Excluir personagem, um caso de uso por objetivo do ator. O ID UC07 foi mantido e os novos IDs continuam a numeração.
 
 ## Índice e rastreabilidade
 
@@ -31,10 +31,14 @@ Visão de todas as funcionalidades previstas. Só o gerenciamento de usuários �
 | UC04 Excluir conta | Usuário | RF06, NF-CON-01, NF-CON-03 | — |
 | UC05 Gerenciar campanha | Mestre | visão §2.3 (próximas entregas) | — |
 | UC06 Usar escudo do mestre | Mestre | visão §2.3 | — |
-| UC07 Gerenciar personagens | Jogador, Mestre | visão §2.3 | — |
-| UC08 Fazer rolagem | Jogador, Mestre | visão §2.3 | — |
+| UC07 Criar personagem | Usuário | RF08, RF05, NF-USA-01, NF-CON-01 | [UC07](UC07-criar-personagem.md) |
+| UC08 Fazer rolagem | Usuário | visão §2.3 | — |
 | UC09 Entrar em campanha | Jogador | visão §2.3 | — |
 | UC10 Associar personagem | Jogador | visão §2.3 | — |
 | UC11 Gerenciar NPCs | Mestre | visão §2.3 | — |
+| UC12 Editar ficha do personagem | Usuário | RF10, RF05, NF-USA-01, NF-CON-01 | [UC12](UC12-editar-ficha.md) |
+| UC13 Listar personagens | Usuário | RF09 | — |
+| UC14 Excluir personagem | Usuário | RF11, NF-CON-01 | — |
+| UC15 Consultar quantidade de entidades | Usuário | RF12 | — |
 
 **Regra:** depois da primeira entrega, IDs de casos de uso **não** são renumerados nem reaproveitados.
