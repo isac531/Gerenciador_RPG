@@ -1,8 +1,12 @@
+#include <fstream>
 #include <string>
 
 #include "../src/business/exception/Excecoes.h"
 #include "../src/business/model/Personagem.h"
 #include "../src/business/validation/RegrasFicha.h"
+#include "../src/infra/RepositorioPersonagemArquivoBinario.h"
+#include "../src/infra/RepositorioPersonagemMemoria.h"
+#include "ArquivoTemporario.h"
 #include "TestRunner.h"
 
 namespace {
@@ -72,4 +76,53 @@ TESTE(editar_ficha_deve_manter_id_e_dono) {
     VERIFICAR(editado.getId() == 7 && editado.getIdDono() == 2);
     VERIFICAR(editado.getFicha().nome == "Thorin II");
     VERIFICAR(original.getFicha().nome == "Thorin");
+}
+
+// ---------- Repositorios de personagem ----------
+
+TESTE(repositorio_personagem_memoria_deve_fazer_crud) {
+    RepositorioPersonagemMemoria repositorio;
+    const int id = repositorio.adicionar(Personagem(1, fichaValida()));
+    VERIFICAR(id == 1);
+    VERIFICAR(repositorio.quantidade() == 1);
+
+    Ficha nova = fichaValida("Thorin II");
+    nova.nivel = 4;
+    VERIFICAR(repositorio.atualizar(repositorio.buscar(id)->comFicha(nova)));
+    VERIFICAR(repositorio.buscar(id)->getFicha().nome == "Thorin II");
+    VERIFICAR(repositorio.buscar(id)->getFicha().nivel == 4);
+
+    VERIFICAR(repositorio.remover(id));
+    VERIFICAR(!repositorio.buscar(id).has_value());
+    VERIFICAR(!repositorio.remover(id));
+    VERIFICAR(!repositorio.atualizar(Personagem(id, 1, nova)));
+}
+
+TESTE(repositorio_personagem_binario_deve_persistir_entre_instancias) {
+    ArquivoTemporario arquivo("rpg_teste_personagens.dat");
+    {
+        RepositorioPersonagemArquivoBinario repositorio(arquivo.caminho());
+        repositorio.adicionar(Personagem(1, fichaValida("Thorin")));
+        const int idExcluido = repositorio.adicionar(Personagem(2, fichaValida("Lia")));
+        repositorio.remover(idExcluido);
+    }
+
+    RepositorioPersonagemArquivoBinario reaberto(arquivo.caminho());
+    const auto personagens = reaberto.listarTodos();
+    VERIFICAR(personagens.size() == 1);
+    const Personagem& thorin = personagens[0];
+    VERIFICAR(thorin.getId() == 1 && thorin.getIdDono() == 1);
+    VERIFICAR(thorin.getFicha().nome == "Thorin" && thorin.getFicha().pontosDeVida == 27);
+    VERIFICAR(thorin.getFicha().atributos.forca == 16 && thorin.getFicha().atributos.carisma == 9);
+    VERIFICAR(reaberto.adicionar(Personagem(1, fichaValida("Bruna"))) == 3);
+}
+
+TESTE(arquivo_de_personagens_corrompido_deve_lancar_falha_armazenamento) {
+    ArquivoTemporario arquivo("rpg_teste_personagens_corrompido.dat");
+    {
+        std::ofstream saida(arquivo.caminho(), std::ios::binary);
+        saida << "lixo";
+    }
+    VERIFICAR_LANCA(RepositorioPersonagemArquivoBinario{arquivo.caminho()},
+                    FalhaArmazenamentoException);
 }

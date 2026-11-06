@@ -10,6 +10,7 @@
 #include "../src/business/exception/Excecoes.h"
 #include "../src/infra/RepositorioArquivoBinario.h"
 #include "../src/infra/RepositorioMemoria.h"
+#include "ArquivoTemporario.h"
 #include "TestRunner.h"
 
 namespace {
@@ -34,20 +35,6 @@ Usuario usuarioComLogin(const std::string& login) {
 Usuario usuarioComSenha(const std::string& senha) {
     return Usuario("isac", senha, Papel::JOGADOR);
 }
-
-// Caminho temporario unico, apagado ao sair do escopo.
-class ArquivoTemporario {
-public:
-    explicit ArquivoTemporario(const std::string& nome)
-        : caminho_((std::filesystem::temp_directory_path() / nome).string()) {
-        std::remove(caminho_.c_str());
-    }
-    ~ArquivoTemporario() { std::remove(caminho_.c_str()); }
-    const std::string& caminho() const { return caminho_; }
-
-private:
-    std::string caminho_;
-};
 
 }  // namespace
 
