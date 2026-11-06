@@ -10,3 +10,7 @@ std::vector<Usuario> ControleUsuarios::listar() const {
 bool ControleUsuarios::excluirConta(int id) {
     return repositorio_.remover(id);
 }
+
+std::size_t ControleUsuarios::quantidade() const {
+    return repositorio_.quantidade();
+}
