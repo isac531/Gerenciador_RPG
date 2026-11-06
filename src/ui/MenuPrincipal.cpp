@@ -85,12 +85,6 @@ void MenuPrincipal::executar() {
 }
 
 bool MenuPrincipal::cadastrarUsuario() {
-    int id;
-    if (!lerInteiro("ID: ", id)) {
-        std::cout << "ID invalido.\n";
-        return static_cast<bool>(std::cin);
-    }
-
     std::string login;
     std::cout << "Login: ";
     if (!std::getline(std::cin, login)) {
@@ -112,14 +106,12 @@ bool MenuPrincipal::cadastrarUsuario() {
     }
 
     try {
-        controleCriarConta_.criarConta(Usuario(id, login, senha, papel));
-        std::cout << "Usuario cadastrado com sucesso.\n";
+        const int id = controleCriarConta_.criarConta(Usuario(login, senha, papel));
+        std::cout << "Usuario cadastrado com sucesso. ID: " << id << '\n';
     } catch (const LoginInvalidoException& e) {
         std::cout << "Login invalido: " << e.what() << '\n';
     } catch (const SenhaInvalidaException& e) {
         std::cout << "Senha invalida: " << e.what() << '\n';
-    } catch (const IdInvalidoException& e) {
-        std::cout << "Nao foi possivel cadastrar: " << e.what() << '\n';
     } catch (const FalhaArmazenamentoException& e) {
         std::cout << "Falha no armazenamento: " << e.what() << '\n';
     }

@@ -24,11 +24,10 @@ Relacionada a: UC01, UC03, UC04 · RF01–RF04, RF06, NF-USA-01, NF-USA-03
 3. Listar usuarios
 0. Sair
 Opcao: 1
-ID: 1
 Login: isac
 Senha: Dado#2026
 Papel (1. Mestre  2. Jogador): 1
-Usuario cadastrado com sucesso.
+Usuario cadastrado com sucesso. ID: 1
 
 Opcao: 3
 ID: 1 | Login: isac | Papel: Mestre

@@ -105,7 +105,9 @@ void RepositorioArquivoBinario::carregar() {
     }
 
     std::map<int, Usuario> carregados;
+    std::int32_t proximoId = 1;
     try {
+        proximoId = lerInt32(arquivo);
         const std::uint32_t quantidade = lerUint32(arquivo);
         for (std::uint32_t i = 0; i < quantidade; ++i) {
             const std::int32_t id = lerInt32(arquivo);
@@ -116,7 +118,7 @@ void RepositorioArquivoBinario::carregar() {
                 throw FalhaArmazenamentoException(
                     "Arquivo " + caminho_ + " corrompido: papel invalido.");
             }
-            if (id <= 0 ||
+            if (id <= 0 || id >= proximoId ||
                 !carregados.emplace(id, Usuario(id, std::move(login), std::move(senha), papel)).second) {
                 throw FalhaArmazenamentoException(
                     "Arquivo " + caminho_ + " corrompido: ID invalido ou duplicado.");
@@ -136,6 +138,7 @@ void RepositorioArquivoBinario::carregar() {
     }
 
     usuarios_ = std::move(carregados);
+    proximoId_ = proximoId;
 }
 
 void RepositorioArquivoBinario::gravar() const {
@@ -147,6 +150,7 @@ void RepositorioArquivoBinario::gravar() const {
         arquivo.exceptions(std::ios::failbit | std::ios::badbit);
         arquivo.open(temporario, std::ios::out | std::ios::binary | std::ios::trunc);
 
+        escreverInt32(arquivo, proximoId_);
         escreverUint32(arquivo, static_cast<std::uint32_t>(usuarios_.size()));
         for (const auto& entrada : usuarios_) {
             const Usuario& usuario = entrada.second;
@@ -173,17 +177,17 @@ void RepositorioArquivoBinario::gravar() const {
     }
 }
 
-bool RepositorioArquivoBinario::adicionar(const Usuario& usuario) {
-    if (!usuarios_.emplace(usuario.getId(), usuario).second) {
-        return false;
-    }
+int RepositorioArquivoBinario::adicionar(const Usuario& usuario) {
+    const int id = proximoId_++;
+    usuarios_.emplace(id, usuario.comId(id));
     try {
         gravar();
     } catch (...) {
-        usuarios_.erase(usuario.getId());
+        usuarios_.erase(id);
+        --proximoId_;
         throw;
     }
-    return true;
+    return id;
 }
 
 bool RepositorioArquivoBinario::remover(int id) {
@@ -222,4 +226,8 @@ std::vector<Usuario> RepositorioArquivoBinario::listarTodos() const {
         todos.push_back(entrada.second);
     }
     return todos;
+}
+
+std::size_t RepositorioArquivoBinario::quantidade() const {
+    return usuarios_.size();
 }
