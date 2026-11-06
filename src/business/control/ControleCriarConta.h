@@ -15,10 +15,10 @@ public:
     // em memoria ou em arquivo.
     explicit ControleCriarConta(IUsuarioRepositorio& repositorio);
 
-    // Valida e cadastra o usuario.
-    // Lanca IdInvalidoException, LoginInvalidoException e SenhaInvalidaException
-    // (e subclasses) ou FalhaArmazenamentoException (erro ao gravar).
-    void criarConta(const Usuario& usuario);
+    // Valida e cadastra o usuario; retorna o ID gerado automaticamente.
+    // Lanca LoginInvalidoException e SenhaInvalidaException (e subclasses)
+    // ou FalhaArmazenamentoException (erro ao gravar).
+    int criarConta(const Usuario& usuario);
 
     // Executam as regras de login / senha; lancam excecao se alguma for violada.
     void validaLogin(const Usuario& usuario) const;
@@ -28,7 +28,6 @@ private:
     using Regras = std::vector<std::unique_ptr<IRegraValidacao>>;
 
     static void executar(const Regras& regras, const Usuario& usuario);
-    void validaId(const Usuario& usuario) const;
 
     IUsuarioRepositorio& repositorio_;
     Regras regrasLogin_;

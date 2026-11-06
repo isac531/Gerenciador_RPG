@@ -33,21 +33,8 @@ void ControleCriarConta::validaSenha(const Usuario& usuario) const {
     executar(regrasSenha_, usuario);
 }
 
-void ControleCriarConta::validaId(const Usuario& usuario) const {
-    if (usuario.getId() <= 0) {
-        throw IdInvalidoException("O ID deve ser um numero positivo.");
-    }
-    if (repositorio_.existe(usuario.getId())) {
-        throw IdInvalidoException("Ja existe um usuario com esse ID.");
-    }
-}
-
-void ControleCriarConta::criarConta(const Usuario& usuario) {
-    validaId(usuario);
+int ControleCriarConta::criarConta(const Usuario& usuario) {
     validaLogin(usuario);
     validaSenha(usuario);
-
-    if (!repositorio_.adicionar(usuario)) {
-        throw IdInvalidoException("Ja existe um usuario com esse ID.");
-    }
+    return repositorio_.adicionar(usuario);
 }
