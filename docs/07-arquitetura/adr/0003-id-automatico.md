@@ -6,7 +6,7 @@
 
 ## Contexto
 
-Até a Entrega 1 o Visitante digitava o ID do usuário, e o sistema recusava IDs não positivos ou repetidos. Na correção, o professor pediu ID automático. A mudança altera o contrato público de `IUsuarioRepositorio` e de `ControleCriarConta`, por isso é registrada aqui (CONTRIBUTING §6.3).
+Até a Entrega 1 o Visitante digitava o ID do usuário, e o sistema recusava IDs não positivos ou repetidos. Na correção, o professor pediu ID automático. A mudança altera o contrato público de `IUsuarioRepositorio` e de `ControleCriarConta`, por isso é registrada aqui (CONTRIBUTING §7.3).
 
 ## Decisão
 
