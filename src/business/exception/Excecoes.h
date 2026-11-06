@@ -69,9 +69,40 @@ public:
 };
 
 // ---------- Excecao de identificador (IdInvalidoException) ----------
-// ID nao positivo ou ja usado por outro usuario.
+// ID que nao corresponde a nenhum cadastro (ex.: dono ou personagem inexistente).
 class IdInvalidoException : public std::runtime_error {
 public:
     explicit IdInvalidoException(const std::string& mensagem)
         : std::runtime_error(mensagem) {}
+};
+
+// ---------- Excecoes da ficha do personagem (FichaInvalidaException) ----------
+class FichaInvalidaException : public std::runtime_error {
+public:
+    explicit FichaInvalidaException(const std::string& mensagem)
+        : std::runtime_error(mensagem) {}
+};
+
+class NomePersonagemInvalidoException : public FichaInvalidaException {
+public:
+    NomePersonagemInvalidoException()
+        : FichaInvalidaException("O nome do personagem deve ter de 1 a 30 caracteres.") {}
+};
+
+class NivelInvalidoException : public FichaInvalidaException {
+public:
+    NivelInvalidoException()
+        : FichaInvalidaException("O nivel deve estar entre 1 e 20.") {}
+};
+
+class PontosDeVidaInvalidosException : public FichaInvalidaException {
+public:
+    PontosDeVidaInvalidosException()
+        : FichaInvalidaException("Os pontos de vida devem ser maiores que zero.") {}
+};
+
+class AtributoInvalidoException : public FichaInvalidaException {
+public:
+    explicit AtributoInvalidoException(const std::string& atributo)
+        : FichaInvalidaException("O atributo " + atributo + " deve estar entre 1 e 30.") {}
 };
