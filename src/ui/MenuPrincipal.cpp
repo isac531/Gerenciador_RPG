@@ -1,32 +1,23 @@
 #include "MenuPrincipal.h"
 
 #include <iostream>
-#include <sstream>
-#include <stdexcept>
+#include <string>
 #include <vector>
 
 #include "../business/exception/Excecoes.h"
 #include "../business/model/Papel.h"
+#include "Console.h"
+#include "MenuPersonagens.h"
 
-bool MenuPrincipal::lerInteiro(const std::string& mensagem, int& valor) {
-    std::cout << mensagem;
-
-    std::string linha;
-    if (!std::getline(std::cin, linha)) {
-        return false;
-    }
-
-    std::istringstream entrada(linha);
-    char caractereExtra;
-    return static_cast<bool>(entrada >> valor) && !(entrada >> caractereExtra);
-}
+using console::lerInteiro;
+using console::lerLinha;
 
 std::optional<TipoArmazenamento> MenuPrincipal::escolherArmazenamento() {
     while (true) {
         int opcao;
         if (!lerInteiro("Escolha o armazenamento:\n"
                         "1. Memoria (RAM)\n"
-                        "2. Arquivo binario (usuarios.dat)\n"
+                        "2. Arquivo binario (usuarios.dat e personagens.dat)\n"
                         "Opcao: ",
                         opcao)) {
             if (!std::cin) {
@@ -46,15 +37,15 @@ std::optional<TipoArmazenamento> MenuPrincipal::escolherArmazenamento() {
     }
 }
 
-MenuPrincipal::MenuPrincipal(ControleCriarConta& controleCriarConta,
-                             ControleUsuarios& controleUsuarios)
-    : controleCriarConta_(controleCriarConta), controleUsuarios_(controleUsuarios) {}
+MenuPrincipal::MenuPrincipal(FacadeSingletonController& fachada) : fachada_(fachada) {}
 
 void MenuPrincipal::executar() {
     while (true) {
         std::cout << "\n1. Cadastrar usuario\n"
                      "2. Excluir usuario\n"
                      "3. Listar usuarios\n"
+                     "4. Personagens\n"
+                     "5. Quantidade de entidades cadastradas\n"
                      "0. Sair\n";
 
         int opcao;
@@ -76,6 +67,12 @@ void MenuPrincipal::executar() {
         case 3:
             listarUsuarios();
             break;
+        case 4:
+            if (!MenuPersonagens(fachada_).executar()) return;
+            break;
+        case 5:
+            exibirQuantidadeEntidades();
+            break;
         case 0:
             return;
         default:
@@ -85,21 +82,9 @@ void MenuPrincipal::executar() {
 }
 
 bool MenuPrincipal::cadastrarUsuario() {
-    int id;
-    if (!lerInteiro("ID: ", id)) {
-        std::cout << "ID invalido.\n";
-        return static_cast<bool>(std::cin);
-    }
-
     std::string login;
-    std::cout << "Login: ";
-    if (!std::getline(std::cin, login)) {
-        return false;
-    }
-
     std::string senha;
-    std::cout << "Senha: ";
-    if (!std::getline(std::cin, senha)) {
+    if (!lerLinha("Login: ", login) || !lerLinha("Senha: ", senha)) {
         return false;
     }
 
@@ -112,14 +97,12 @@ bool MenuPrincipal::cadastrarUsuario() {
     }
 
     try {
-        controleCriarConta_.criarConta(Usuario(id, login, senha, papel));
-        std::cout << "Usuario cadastrado com sucesso.\n";
+        const int id = fachada_.criarConta(Usuario(login, senha, papel));
+        std::cout << "Usuario cadastrado com sucesso. ID: " << id << '\n';
     } catch (const LoginInvalidoException& e) {
         std::cout << "Login invalido: " << e.what() << '\n';
     } catch (const SenhaInvalidaException& e) {
         std::cout << "Senha invalida: " << e.what() << '\n';
-    } catch (const IdInvalidoException& e) {
-        std::cout << "Nao foi possivel cadastrar: " << e.what() << '\n';
     } catch (const FalhaArmazenamentoException& e) {
         std::cout << "Falha no armazenamento: " << e.what() << '\n';
     }
@@ -135,8 +118,8 @@ bool MenuPrincipal::excluirUsuario() {
     }
 
     try {
-        if (controleUsuarios_.excluirConta(id)) {
-            std::cout << "Usuario excluido com sucesso.\n";
+        if (fachada_.excluirUsuario(id)) {
+            std::cout << "Usuario e seus personagens excluidos com sucesso.\n";
         } else {
             std::cout << "Usuario nao encontrado.\n";
         }
@@ -148,7 +131,7 @@ bool MenuPrincipal::excluirUsuario() {
 }
 
 void MenuPrincipal::listarUsuarios() const {
-    const std::vector<Usuario> usuarios = controleUsuarios_.listar();
+    const std::vector<Usuario> usuarios = fachada_.listarUsuarios();
 
     if (usuarios.empty()) {
         std::cout << "Nenhum usuario cadastrado.\n";
@@ -160,4 +143,10 @@ void MenuPrincipal::listarUsuarios() const {
         std::cout << "ID: " << usuario.getId() << " | Login: " << usuario.getLogin()
                   << " | Papel: " << papelParaTexto(usuario.getPapel()) << '\n';
     }
+}
+
+void MenuPrincipal::exibirQuantidadeEntidades() const {
+    std::cout << "Entidades cadastradas: " << fachada_.obterQuantidadeEntidades()
+              << " (usuarios: " << fachada_.obterQuantidadeUsuarios()
+              << ", personagens: " << fachada_.obterQuantidadePersonagens() << ")\n";
 }

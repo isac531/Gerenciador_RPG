@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <optional>
 #include <vector>
 
@@ -13,8 +14,10 @@ class IUsuarioRepositorio {
 public:
     virtual ~IUsuarioRepositorio() = default;
 
-    // Retorna false se ja existir um usuario com o mesmo ID.
-    virtual bool adicionar(const Usuario& usuario) = 0;
+    // Atribui ao usuario o proximo ID livre, guarda-o e retorna esse ID.
+    // O ID que vier no objeto recebido e ignorado. IDs nunca sao
+    // reaproveitados, mesmo depois de uma exclusao (ver ADR-0003).
+    virtual int adicionar(const Usuario& usuario) = 0;
 
     // Retorna false se o ID nao existir.
     virtual bool remover(int id) = 0;
@@ -24,4 +27,6 @@ public:
 
     // Usuarios em ordem crescente de ID.
     virtual std::vector<Usuario> listarTodos() const = 0;
+
+    virtual std::size_t quantidade() const = 0;
 };

@@ -8,6 +8,7 @@
 // Persiste os usuarios em um arquivo binario (padrao: usuarios.dat).
 //
 // Formato (inteiros em little-endian):
+//   int32  proximo ID a ser atribuido
 //   uint32 quantidade
 //   para cada usuario:
 //     int32  id
@@ -22,11 +23,12 @@ class RepositorioArquivoBinario : public IUsuarioRepositorio {
 public:
     explicit RepositorioArquivoBinario(std::string caminho = "usuarios.dat");
 
-    bool adicionar(const Usuario& usuario) override;
+    int adicionar(const Usuario& usuario) override;
     bool remover(int id) override;
     bool existe(int id) const override;
     std::optional<Usuario> buscar(int id) const override;
     std::vector<Usuario> listarTodos() const override;
+    std::size_t quantidade() const override;
 
     const std::string& getCaminho() const;
 
@@ -36,4 +38,5 @@ private:
 
     std::string caminho_;
     std::map<int, Usuario> usuarios_;
+    int proximoId_ = 1;
 };

@@ -21,16 +21,18 @@ make          # compila o executável rpg
 make test     # compila e executa os testes automatizados
 ```
 
-Ao iniciar, o sistema pergunta onde guardar os usuários (RF05):
+Ao iniciar, o sistema pergunta onde guardar os usuários e os personagens (RF05):
 
 ```text
 Escolha o armazenamento:
 1. Memoria (RAM)
-2. Arquivo binario (usuarios.dat)
+2. Arquivo binario (usuarios.dat e personagens.dat)
 ```
 
-- **Memória:** os usuários ficam numa coleção em RAM e se perdem ao fechar o programa.
-- **Arquivo binário:** os usuários são carregados de `usuarios.dat` (na pasta de onde o programa é executado) e cada cadastro ou exclusão é gravado na hora. Falhas de leitura ou gravação são tratadas e informadas sem encerrar o programa (NF-CON-01).
+- **Memória:** os dados ficam em coleções em RAM e se perdem ao fechar o programa.
+- **Arquivo binário:** os dados são carregados de `usuarios.dat` e `personagens.dat` (na pasta de onde o programa é executado) e cada alteração é gravada na hora. Falhas de leitura ou gravação são tratadas e informadas sem encerrar o programa (NF-CON-01).
+
+No menu principal é possível cadastrar, listar e excluir usuários (o ID é gerado pelo sistema), abrir o menu de **personagens** (criar, listar, editar a ficha e excluir) e consultar a **quantidade de entidades cadastradas**. Toda a interface passa pela fachada única `FacadeSingletonController` (Facade + Singleton).
 
 As senhas são gravadas sem criptografia no arquivo; não use senhas reais.
 
@@ -46,7 +48,7 @@ As senhas são gravadas sem criptografia no arquivo; não use senhas reais.
 | 2. Descrição geral | [`docs/01-visao.md`](docs/01-visao.md) §2 |
 | 3. Glossário | [`docs/02-glossario.md`](docs/02-glossario.md) |
 | 4. Elicitação de requisitos | [`docs/03-elicitacao.md`](docs/03-elicitacao.md) + [`docs/03-elicitacao/anexos/`](docs/03-elicitacao/anexos/) |
-| 5.1 Requisitos funcionais | [`openspec/specs/usuarios/spec.md`](openspec/specs/usuarios/spec.md) |
+| 5.1 Requisitos funcionais | [`openspec/specs/usuarios/spec.md`](openspec/specs/usuarios/spec.md) (RF01–RF07) e [`openspec/specs/personagens/spec.md`](openspec/specs/personagens/spec.md) (RF08–RF12) |
 | 5.2 Requisitos não funcionais | [`openspec/specs/rnf/`](openspec/specs/rnf/) (segurança, confiabilidade, manutenibilidade, usabilidade, desempenho, portabilidade) |
 | 6. Casos de uso | [`docs/04-casos-de-uso/`](docs/04-casos-de-uso/) |
 | 7. Diagrama de classes de análise | [`docs/05-analise.md`](docs/05-analise.md) |
@@ -74,9 +76,10 @@ As senhas são gravadas sem criptografia no arquivo; não use senhas reais.
 │   └── diagramas/                ← diagramas originais (PDF/PNG)
 ├── openspec/
 │   ├── config.yaml
-│   ├── specs/usuarios/           ← requisitos funcionais (RF01–RF07)
+│   ├── specs/usuarios/           ← requisitos funcionais de usuários (RF01–RF07)
+│   ├── specs/personagens/        ← requisitos funcionais de personagens (RF08–RF12)
 │   ├── specs/rnf/<categoria>/    ← requisitos não funcionais
-│   └── changes/                  ← mudanças de requisito a partir da Entrega 2
+│   └── changes/                  ← mudanças de requisito; as concluídas ficam em changes/archive/
 ├── src/                          ← código C++17 (ui, business, infra) e Makefile
 └── .github/                      ← validação das specs no GitHub Actions, modelo de PR
 ```

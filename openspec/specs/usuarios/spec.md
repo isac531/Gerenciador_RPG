@@ -1,34 +1,40 @@
 # usuarios Specification
 
 ## Purpose
-Gerenciamento dos usuários do sistema (Mestre e Jogador): cadastro com validação de login e senha, listagem, exclusão, autenticação e escolha do armazenamento (memória ou arquivo binário). É o núcleo essencial das Sprints 1 e 2.
+Gerenciamento dos usuários do sistema (Mestre e Jogador): cadastro com ID automático e validação de login e senha, listagem, exclusão, autenticação e escolha do armazenamento (memória ou arquivo binário). É o núcleo essencial das Sprints 1 e 2.
 
 ## Requirements
 
 ### Requirement: RF01 — Cadastrar usuário
-O sistema DEVE permitir que um Visitante crie uma conta informando ID (número inteiro positivo), login, senha e papel (Mestre ou Jogador), recusando IDs e logins já existentes e informando o motivo de qualquer recusa.
+O sistema DEVE permitir que um Visitante crie uma conta informando login, senha e papel (Mestre ou Jogador). O sistema DEVE gerar o ID do usuário automaticamente, de forma sequencial a partir de 1, sem reaproveitar IDs de usuários excluídos, exibir o ID gerado, recusar logins já existentes e informar o motivo de qualquer recusa.
 
 **Prioridade:** Essencial
 **Casos de uso:** UC01
 
 #### Scenario: Cadastro válido
-- **GIVEN** não existe usuário com ID 1 nem com login "isac"
-- **WHEN** o Visitante cadastra ID 1, login "isac", senha "Dado#2026" e papel Mestre
-- **THEN** o usuário é armazenado, o sistema exibe "Usuario cadastrado com sucesso." e ele passa a aparecer na listagem
+- **GIVEN** não existe usuário com login "isac" e nenhum usuário foi cadastrado ainda
+- **WHEN** o Visitante cadastra login "isac", senha "Dado#2026" e papel Mestre
+- **THEN** o usuário é armazenado com ID 1, o sistema exibe "Usuario cadastrado com sucesso. ID: 1" e ele passa a aparecer na listagem
+
+#### Scenario: ID já existente
+- **GIVEN** já existe um usuário com ID 1
+- **WHEN** o Visitante cadastra outro usuário válido
+- **THEN** o sistema não repete o ID 1: o novo usuário recebe o ID 2, sem que o Visitante precise informar um número
+
+#### Scenario: ID não positivo
+- **GIVEN** nenhum usuário foi cadastrado ainda
+- **WHEN** o Visitante cadastra o primeiro usuário
+- **THEN** o sistema gera o ID 1; o Visitante não informa o ID, então nunca há ID zero ou negativo
+
+#### Scenario: ID de usuário excluído não é reaproveitado
+- **GIVEN** foram cadastrados os usuários de ID 1 e 2 e o usuário de ID 2 foi excluído
+- **WHEN** o Visitante cadastra outro usuário válido, mesmo depois de reiniciar o sistema com o arquivo binário
+- **THEN** o novo usuário recebe o ID 3
 
 #### Scenario: Login já existente
 - **GIVEN** já existe um usuário com login "isac"
 - **WHEN** o Visitante tenta cadastrar outro usuário com login "isac"
 - **THEN** o sistema recusa o cadastro informando "Login ja esta em uso."
-
-#### Scenario: ID já existente
-- **GIVEN** já existe um usuário com ID 1
-- **WHEN** o Visitante tenta cadastrar outro usuário com ID 1
-- **THEN** o sistema recusa o cadastro informando "Ja existe um usuario com esse ID."
-
-#### Scenario: ID não positivo
-- **WHEN** o Visitante tenta cadastrar um usuário com ID 0
-- **THEN** o sistema recusa o cadastro informando "O ID deve ser um numero positivo."
 
 ### Requirement: RF02 — Regras de login
 O sistema DEVE aceitar apenas logins não vazios, com no máximo 12 caracteres e sem números, recusando o cadastro com uma exceção de login inválido que informa a regra violada.
@@ -97,10 +103,10 @@ O sistema DEVE listar todos os usuários cadastrados, exibindo ID, login e papel
 - **THEN** o sistema exibe "Nenhum usuario cadastrado."
 
 ### Requirement: RF05 — Escolher o armazenamento
-O sistema DEVE perguntar, no início da execução, onde os usuários serão armazenados: em memória (RAM) ou em arquivo binário; no arquivo binário, os usuários já gravados DEVEM ser carregados ao iniciar.
+O sistema DEVE perguntar, no início da execução, onde os usuários e os personagens serão armazenados: em memória (RAM) ou em arquivo binário (`usuarios.dat` e `personagens.dat`); no arquivo binário, os dados já gravados DEVEM ser carregados ao iniciar.
 
 **Prioridade:** Essencial
-**Casos de uso:** UC01, UC03, UC04
+**Casos de uso:** UC01, UC03, UC04, UC07, UC12, UC13, UC14
 
 #### Scenario: Armazenamento em memória
 - **GIVEN** o sistema é iniciado com a opção "Memoria"
@@ -109,11 +115,11 @@ O sistema DEVE perguntar, no início da execução, onde os usuários serão arm
 
 #### Scenario: Armazenamento em arquivo binário
 - **GIVEN** o sistema é iniciado com a opção "Arquivo binario"
-- **WHEN** 2 usuários são cadastrados, o sistema é fechado e iniciado de novo com a mesma opção
-- **THEN** a listagem exibe os mesmos 2 usuários
+- **WHEN** 2 usuários e 1 personagem são cadastrados, o sistema é fechado e iniciado de novo com a mesma opção
+- **THEN** a listagem exibe os mesmos 2 usuários e a listagem de personagens exibe o mesmo personagem
 
 ### Requirement: RF06 — Excluir usuário
-O sistema DEVE permitir excluir um usuário pelo ID, informando quando o ID não existe.
+O sistema DEVE permitir excluir um usuário pelo ID, excluindo também os personagens dele, e informar quando o ID não existe.
 
 **Prioridade:** Importante
 **Casos de uso:** UC04
@@ -121,7 +127,12 @@ O sistema DEVE permitir excluir um usuário pelo ID, informando quando o ID não
 #### Scenario: Exclusão de usuário existente
 - **GIVEN** existe o usuário de ID 2
 - **WHEN** o usuário pede a exclusão do ID 2
-- **THEN** o sistema exibe "Usuario excluido com sucesso." e o ID 2 some da listagem
+- **THEN** o sistema exibe "Usuario e seus personagens excluidos com sucesso." e o ID 2 some da listagem
+
+#### Scenario: Exclusão em cascata dos personagens
+- **GIVEN** o usuário de ID 2 tem 2 personagens e o usuário de ID 3 tem 1 personagem
+- **WHEN** o usuário pede a exclusão do ID 2
+- **THEN** os 2 personagens do usuário 2 somem da listagem de personagens e o personagem do usuário 3 continua
 
 #### Scenario: ID inexistente
 - **GIVEN** não existe usuário de ID 9

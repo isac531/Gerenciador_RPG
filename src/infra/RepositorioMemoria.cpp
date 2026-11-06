@@ -1,7 +1,9 @@
 #include "RepositorioMemoria.h"
 
-bool RepositorioMemoria::adicionar(const Usuario& usuario) {
-    return usuarios_.emplace(usuario.getId(), usuario).second;
+int RepositorioMemoria::adicionar(const Usuario& usuario) {
+    const int id = proximoId_++;
+    usuarios_.emplace(id, usuario.comId(id));
+    return id;
 }
 
 bool RepositorioMemoria::remover(int id) {
@@ -27,4 +29,8 @@ std::vector<Usuario> RepositorioMemoria::listarTodos() const {
         todos.push_back(entrada.second);
     }
     return todos;
+}
+
+std::size_t RepositorioMemoria::quantidade() const {
+    return usuarios_.size();
 }

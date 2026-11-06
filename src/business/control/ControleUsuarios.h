@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <vector>
 
 #include "../model/Usuario.h"
@@ -15,6 +16,8 @@ public:
 
     // Retorna false se o ID nao existir. Pode lancar FalhaArmazenamentoException.
     bool excluirConta(int id);
+
+    std::size_t quantidade() const;
 
 private:
     IUsuarioRepositorio& repositorio_;

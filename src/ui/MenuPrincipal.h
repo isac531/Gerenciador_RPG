@@ -1,32 +1,28 @@
 #pragma once
 
 #include <optional>
-#include <string>
 
-#include "../business/control/ControleCriarConta.h"
-#include "../business/control/ControleUsuarios.h"
+#include "../business/control/FacadeSingletonController.h"
 #include "../business/repository/TipoArmazenamento.h"
 
-// Interface de console: le a entrada do usuario e chama o controle.
+// Interface de console: le a entrada do usuario e chama a fachada.
 class MenuPrincipal {
 public:
     // Pergunta qual armazenamento usar.
     // Retorna std::nullopt apenas se a entrada padrao for encerrada.
     static std::optional<TipoArmazenamento> escolherArmazenamento();
 
-    MenuPrincipal(ControleCriarConta& controleCriarConta, ControleUsuarios& controleUsuarios);
+    explicit MenuPrincipal(FacadeSingletonController& fachada);
 
     // Laco principal do menu; termina com a opcao 0 ou fim da entrada.
     void executar();
 
 private:
-    static bool lerInteiro(const std::string& mensagem, int& valor);
-
     // Retornam false apenas quando a entrada padrao foi encerrada.
     bool cadastrarUsuario();
     bool excluirUsuario();
     void listarUsuarios() const;
+    void exibirQuantidadeEntidades() const;
 
-    ControleCriarConta& controleCriarConta_;
-    ControleUsuarios& controleUsuarios_;
+    FacadeSingletonController& fachada_;
 };
