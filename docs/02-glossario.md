@@ -26,5 +26,5 @@
 | **Rolagem** | Lançamento de um ou mais dados de um mesmo tipo somado a um modificador, escrito *NdX+M*. O sistema registra o resultado, o autor e a data e hora. | jogada, roll | 2D6+3 = 11 |
 | **Senha** | Segredo usado com o login para autenticar o usuário. Segue a política padrão do AWS IAM (RF03) e nunca é exibida. | password, código | — |
 | **Teste** | Rolagem de D20 somada a um modificador (e ao bônus de proficiência, quando cabe) e comparada com uma classe de dificuldade. | check, verificação | Teste de Destreza: D20+2 contra CD 12 |
-| **Usuário** | Pessoa cadastrada no sistema, com ID, login, senha e um papel. | conta, pessoa, membro | ID 1, login `isac`, papel Mestre |
+| **Usuário** | Pessoa cadastrada no sistema, com ID (gerado pelo sistema), login, senha e um papel. | conta, pessoa, membro | ID 1, login `isac`, papel Mestre |
 | **Visitante** | Pessoa que usa o sistema sem estar autenticada; só pode criar uma conta. | anônimo, convidado | — |

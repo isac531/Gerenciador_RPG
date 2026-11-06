@@ -49,6 +49,7 @@ classDiagram
             -string login_
             -string senha_
             -Papel papel_
+            +comId(id) Usuario
             +getId() int
             +getLogin() string
             +getSenha() string
@@ -69,10 +70,9 @@ classDiagram
             -IUsuarioRepositorio& repositorio_
             -vector~IRegraValidacao~ regrasLogin_
             -vector~IRegraValidacao~ regrasSenha_
-            +criarConta(usuario) void
+            +criarConta(usuario) int
             +validaLogin(usuario) void
             +validaSenha(usuario) void
-            -validaId(usuario) void
         }
         class ControleUsuarios {
             -IUsuarioRepositorio& repositorio_
@@ -81,11 +81,12 @@ classDiagram
         }
         class IUsuarioRepositorio {
             <<interface>>
-            +adicionar(usuario) bool
+            +adicionar(usuario) int
             +remover(id) bool
             +existe(id) bool
             +buscar(id) optional~Usuario~
             +listarTodos() vector~Usuario~
+            +quantidade() size_t
         }
         class IRegraValidacao {
             <<interface>>
@@ -129,7 +130,6 @@ classDiagram
 
     MenuPrincipal --> ControleCriarConta
     MenuPrincipal --> ControleUsuarios
-    MenuPrincipal ..> IdInvalidoException : trata
     MenuPrincipal ..> TipoArmazenamento : devolve a escolha
     FabricaRepositorio ..> TipoArmazenamento
     MenuPrincipal ..> LoginInvalidoException : trata
@@ -138,7 +138,6 @@ classDiagram
     ControleCriarConta --> IUsuarioRepositorio
     ControleCriarConta o-- IRegraValidacao
     ControleCriarConta ..> Usuario
-    ControleCriarConta ..> IdInvalidoException : lança
     ControleUsuarios --> IUsuarioRepositorio
     Usuario --> Papel
 
@@ -191,7 +190,6 @@ classDiagram
 
 | Exceção | Regra (requisito) | Mensagem |
 |---|---|---|
-| IdInvalidoException | RF01 | O ID deve ser um numero positivo. / Ja existe um usuario com esse ID. |
 | LoginVazioException | RF02 | O login nao pode ser vazio. |
 | LoginLongoException | RF02 | O login deve ter no maximo 12 caracteres. |
 | LoginComNumeroException | RF02 | O login nao pode conter numeros. |
@@ -203,7 +201,7 @@ classDiagram
 
 ### Formato do arquivo binário `usuarios.dat`
 
-Inteiros de tamanho fixo, little-endian (NF-POR-02): `uint32` quantidade de usuários; para cada usuário, `int32` ID, `uint32` tamanho + bytes do login, `uint32` tamanho + bytes da senha, `uint8` papel (1 = Mestre, 2 = Jogador). A gravação é feita num arquivo temporário (`usuarios.dat.tmp`) que depois substitui o original; se falhar, a alteração é desfeita também em memória.
+Inteiros de tamanho fixo, little-endian (NF-POR-02): `int32` próximo ID a ser atribuído (ADR-0003), `uint32` quantidade de usuários; para cada usuário, `int32` ID, `uint32` tamanho + bytes do login, `uint32` tamanho + bytes da senha, `uint8` papel (1 = Mestre, 2 = Jogador). A gravação é feita num arquivo temporário (`usuarios.dat.tmp`) que depois substitui o original; se falhar, a alteração é desfeita também em memória.
 
 ## 3. Princípios SOLID aplicados
 
@@ -236,7 +234,7 @@ Testes em `test/testes.cpp` (`cd src && make test`).
 
 | Requisito | Classes | Testes | Situação |
 |---|---|---|---|
-| RF01 Cadastrar usuário | ControleCriarConta, LoginUnicoRegra, IdInvalidoException | deve_recusar_login_ja_existente, deve_recusar_cadastro_com_id_duplicado, deve_recusar_id_nao_positivo | Implementado |
+| RF01 Cadastrar usuário | ControleCriarConta, LoginUnicoRegra, IUsuarioRepositorio (ID automático) | deve_recusar_login_ja_existente, deve_gerar_ids_sequenciais_a_partir_de_1, deve_ignorar_id_informado_no_cadastro, nao_deve_reaproveitar_id_de_usuario_excluido, repositorio_binario_deve_persistir_entre_instancias | Implementado |
 | RF02 Regras de login | LoginVazioRegra, LoginLongoRegra, LoginComNumeroRegra | deve_recusar_login_vazio, deve_recusar_login_so_com_espacos, deve_recusar_login_com_13_caracteres, deve_aceitar_login_com_12_caracteres, deve_recusar_login_com_numeros | Implementado |
 | RF03 Regras de senha | SenhaTamanhoRegra, SenhaCaracteresRegra, SenhaIgualUsuarioRegra | deve_recusar_senha_com_menos_de_8_caracteres, deve_recusar_senha_com_mais_de_128_caracteres, deve_recusar_senha_com_apenas_2_tipos_de_caractere, deve_aceitar_senha_com_3_tipos_de_caractere, deve_recusar_senha_igual_ao_login | Implementado |
 | RF04 Listar usuários | ControleUsuarios, MenuPrincipal | listar_deve_retornar_os_usuarios_cadastrados, listar_sem_usuarios_deve_retornar_vazio | Implementado |
@@ -246,7 +244,7 @@ Testes em `test/testes.cpp` (`cd src && make test`).
 | NF-SEG-01 Senha nunca exibida | MenuPrincipal, Excecoes.h | mensagens_de_erro_nao_devem_conter_a_senha | Implementado |
 | NF-SEG-02 Falha de login sem pista | — | — | Planejado com RF07 |
 | NF-MAN-01, NF-MAN-02 | IUsuarioRepositorio, IRegraValidacao | — (verificado por revisão do projeto) | Implementado |
-| NF-MAN-03 Testes automatizados | test/ | 22 testes | Implementado |
+| NF-MAN-03 Testes automatizados | test/ | 23 testes | Implementado |
 | NF-CON-01, NF-CON-02, NF-CON-03 | RepositorioArquivoBinario, FalhaArmazenamentoException | arquivo_binario_truncado_deve_lancar_falha_armazenamento, arquivo_binario_corrompido_deve_lancar_falha_armazenamento | Implementado |
 | NF-DES-01 Tempo de listagem e carga | RepositorioArquivoBinario | medição manual em 14/10/2026: carga de 10.000 usuários em ~11 ms e listagem em ~5 ms | Atendido |
 | NF-USA-01, NF-USA-03 | MenuPrincipal, Excecoes.h | — (verificado executando o programa) | Implementado |
