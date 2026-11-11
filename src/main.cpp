@@ -17,7 +17,7 @@ Repositorios montarRepositorios(TipoArmazenamento tipo) {
 
     try {
         auto repositorios = escolherFabrica(TipoArmazenamento::ARQUIVO_BINARIO)->criarRepositorios();
-        std::cout << "Usando arquivos binarios usuarios.dat e personagens.dat.\n";
+        std::cout << "Usando arquivos binarios usuarios.dat, personagens.dat e acessos.dat.\n";
         return repositorios;
     } catch (const FalhaArmazenamentoException& e) {
         std::cout << "Falha no armazenamento: " << e.what() << '\n'

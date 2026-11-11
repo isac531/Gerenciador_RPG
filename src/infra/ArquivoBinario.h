@@ -13,11 +13,13 @@ namespace arquivo_binario {
 
 void escreverUint32(std::ostream& saida, std::uint32_t valor);
 void escreverInt32(std::ostream& saida, std::int32_t valor);
+void escreverInt64(std::ostream& saida, std::int64_t valor);
 void escreverUint8(std::ostream& saida, std::uint8_t valor);
 void escreverString(std::ostream& saida, const std::string& texto);
 
 std::uint32_t lerUint32(std::istream& entrada);
 std::int32_t lerInt32(std::istream& entrada);
+std::int64_t lerInt64(std::istream& entrada);
 std::uint8_t lerUint8(std::istream& entrada);
 std::string lerString(std::istream& entrada, const std::string& caminho);
 

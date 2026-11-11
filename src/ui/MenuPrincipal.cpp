@@ -17,7 +17,7 @@ std::optional<TipoArmazenamento> MenuPrincipal::escolherArmazenamento() {
         int opcao;
         if (!lerInteiro("Escolha o armazenamento:\n"
                         "1. Memoria (RAM)\n"
-                        "2. Arquivo binario (usuarios.dat e personagens.dat)\n"
+                        "2. Arquivo binario (usuarios.dat, personagens.dat e acessos.dat)\n"
                         "Opcao: ",
                         opcao)) {
             if (!std::cin) {
