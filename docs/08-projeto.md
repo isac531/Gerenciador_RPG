@@ -14,12 +14,12 @@ src/
 │   ├── control/              ← FacadeSingletonController (fachada única) e os controles ControleCriarConta (UC01), ControleUsuarios (UC03, UC04), ControlePersonagem (UC07, UC12–UC14)
 │   ├── validation/           ← IRegraValidacao (login e senha) e IRegraFicha (ficha do personagem)
 │   ├── exception/            ← exceções de negócio: Login/Senha/FichaInvalida, IdInvalidoException, FalhaArmazenamentoException
-│   └── repository/           ← interfaces IUsuarioRepositorio e IPersonagemRepositorio, enum TipoArmazenamento
-└── infra/                    ← repositórios em memória e em arquivo binário, ArquivoBinario, FabricaRepositorio
+│   └── repository/           ← interfaces IUsuarioRepositorio e IPersonagemRepositorio, FabricaRepositorio (Creator do Factory Method), enum TipoArmazenamento
+└── infra/                    ← repositórios em memória e em arquivo binário, ArquivoBinario, fábricas concretas (FabricaMemoria, FabricaArquivoBinario) e EscolhaFabrica
 test/                         ← um teste por cenário das regras (make test)
 ```
 
-**Regra de dependência:** `ui` → `business` ← `infra`. A `ui` só conhece a `FacadeSingletonController` (ver [ADR-0004](07-arquitetura/adr/0004-fachada-singleton.md)). A camada `business` não inclui nada de `ui` nem de `infra`; ela conhece só a interface `IUsuarioRepositorio`, e `infra` a implementa. Só o `main.cpp` (raiz de composição) conhece as três camadas e liga a escolha da `ui` à fábrica da `infra` (ver [ADR-0001](07-arquitetura/adr/0001-persistencia-substituivel.md)).
+**Regra de dependência:** `ui` → `business` ← `infra`. A `ui` só conhece a `FacadeSingletonController` (ver [ADR-0004](07-arquitetura/adr/0004-fachada-singleton.md)). A camada `business` não inclui nada de `ui` nem de `infra`; ela conhece só a interface `IUsuarioRepositorio`, e `infra` a implementa. Só o `main.cpp` (raiz de composição) conhece as três camadas e liga a escolha da `ui` à fábrica da `infra` (`escolherFabrica`) (ver [ADR-0001](07-arquitetura/adr/0001-persistencia-substituivel.md)).
 
 ## 2. Diagrama de classes de projeto
 
@@ -128,6 +128,13 @@ classDiagram
             +listarTodos() vector~Personagem~
             +quantidade() size_t
         }
+        class FabricaRepositorio {
+            <<abstract, Creator>>
+            +criarRepositorioUsuarios()* unique_ptr~IUsuarioRepositorio~
+            +criarRepositorioPersonagens()* unique_ptr~IPersonagemRepositorio~
+            +tipo()* TipoArmazenamento
+            +criarRepositorios() Repositorios
+        }
         class IRegraValidacao {
             <<interface>>
             +validar(usuario) void
@@ -157,10 +164,21 @@ classDiagram
             +carregar(caminho, ler)$ bool
             +gravar(caminho, escrever)$ void
         }
-        class FabricaRepositorio {
+        class FabricaMemoria {
+            +criarRepositorioUsuarios() unique_ptr~IUsuarioRepositorio~
+            +criarRepositorioPersonagens() unique_ptr~IPersonagemRepositorio~
+            +tipo() TipoArmazenamento
+        }
+        class FabricaArquivoBinario {
+            -string caminhoUsuarios_
+            -string caminhoPersonagens_
+            +criarRepositorioUsuarios() unique_ptr~IUsuarioRepositorio~
+            +criarRepositorioPersonagens() unique_ptr~IPersonagemRepositorio~
+            +tipo() TipoArmazenamento
+        }
+        class EscolhaFabrica {
             <<utility>>
-            +criarRepositorioUsuarios(tipo)$ unique_ptr~IUsuarioRepositorio~
-            +criarRepositorioPersonagens(tipo)$ unique_ptr~IPersonagemRepositorio~
+            +escolherFabrica(tipo)$ unique_ptr~FabricaRepositorio~
         }
     }
 
@@ -189,11 +207,18 @@ classDiagram
     RepositorioPersonagemMemoria <|-- RepositorioPersonagemArquivoBinario
     RepositorioArquivoBinario ..> ArquivoBinario
     RepositorioPersonagemArquivoBinario ..> ArquivoBinario
-    FabricaRepositorio ..> RepositorioMemoria : cria
-    FabricaRepositorio ..> RepositorioArquivoBinario : cria
-    FabricaRepositorio ..> RepositorioPersonagemMemoria : cria
-    FabricaRepositorio ..> RepositorioPersonagemArquivoBinario : cria
+    FabricaRepositorio <|-- FabricaMemoria
+    FabricaRepositorio <|-- FabricaArquivoBinario
+    FabricaRepositorio ..> IUsuarioRepositorio : factory method
+    FabricaRepositorio ..> IPersonagemRepositorio : factory method
+    FabricaMemoria ..> RepositorioMemoria : cria
+    FabricaMemoria ..> RepositorioPersonagemMemoria : cria
+    FabricaArquivoBinario ..> RepositorioArquivoBinario : cria
+    FabricaArquivoBinario ..> RepositorioPersonagemArquivoBinario : cria
+    EscolhaFabrica ..> FabricaRepositorio : devolve
 ```
+
+> O diagrama completo da Sprint 4 (S4.1), com a entidade de acessos, o Adapter e o Template Method, será redesenhado quando esses itens forem implementados.
 
 ### Sprints 1 e 2 (S2.1)
 
@@ -408,7 +433,7 @@ Nos dois arquivos, a gravação é feita num arquivo temporário (`.tmp`) que de
 | Singleton | S3 | FacadeSingletonController (construtor privado, `getInstancia()` com `static` local, cópia proibida) | Uma única fachada para toda a aplicação, inicializada uma vez em `main.cpp` | [ADR-0004](07-arquitetura/adr/0004-fachada-singleton.md) |
 | Facade | S3 | FacadeSingletonController (fachada); ControleCriarConta, ControleUsuarios, ControlePersonagem (subsistema); MenuPrincipal, MenuPersonagens (clientes) | A `ui` usa um único ponto de entrada; operações entre entidades (exclusão em cascata, contagem de entidades) ficam no negócio | [ADR-0004](07-arquitetura/adr/0004-fachada-singleton.md) |
 | Repository | S4 | (iniciado na S2 e estendido na S3: IUsuarioRepositorio, IPersonagemRepositorio e suas implementações) | | |
-| Factory Method / Abstract Factory | S4 | (iniciado na S2: FabricaRepositorio, com uma função por entidade na S3) | | |
+| Factory Method | S4 | FabricaRepositorio (Creator abstrato, na business; declara os factory methods `criarRepositorioUsuarios()` e `criarRepositorioPersonagens()`), FabricaMemoria e FabricaArquivoBinario (Creators concretos, na infra, decidem a classe instanciada), IUsuarioRepositorio e IPersonagemRepositorio (produtos), `escolherFabrica()` (seleciona o Creator a partir de TipoArmazenamento) | Escolher o tipo de repositório (RF05) sem `if` espalhado e sem que a business conheça classes da infra; novo mecanismo = nova subclasse (NF-MAN-01) | A registrar (ADR Repository + Factory) |
 | Adapter | S4 | | | |
 | Template Method | S4 | | | |
 | Command | S5 | | | |
@@ -416,7 +441,7 @@ Nos dois arquivos, a gravação é feita num arquivo temporário (`.tmp`) que de
 
 ## 5. Rastreabilidade requisito → código → teste
 
-Testes em `test/testes.cpp`, `test/testes_personagem.cpp` e `test/testes_fachada.cpp` (`cd src && make test`).
+Testes em `test/testes.cpp`, `test/testes_personagem.cpp`, `test/testes_fachada.cpp` e `test/testes_fabrica.cpp` (`cd src && make test`).
 
 | Requisito | Classes | Testes | Situação |
 |---|---|---|---|
@@ -424,7 +449,7 @@ Testes em `test/testes.cpp`, `test/testes_personagem.cpp` e `test/testes_fachada
 | RF02 Regras de login | LoginVazioRegra, LoginLongoRegra, LoginComNumeroRegra | deve_recusar_login_vazio, deve_recusar_login_so_com_espacos, deve_recusar_login_com_13_caracteres, deve_aceitar_login_com_12_caracteres, deve_recusar_login_com_numeros | Implementado |
 | RF03 Regras de senha | SenhaTamanhoRegra, SenhaCaracteresRegra, SenhaIgualUsuarioRegra | deve_recusar_senha_com_menos_de_8_caracteres, deve_recusar_senha_com_mais_de_128_caracteres, deve_recusar_senha_com_apenas_2_tipos_de_caractere, deve_aceitar_senha_com_3_tipos_de_caractere, deve_recusar_senha_igual_ao_login | Implementado |
 | RF04 Listar usuários | ControleUsuarios, MenuPrincipal | listar_deve_retornar_os_usuarios_cadastrados, listar_sem_usuarios_deve_retornar_vazio | Implementado |
-| RF05 Escolher o armazenamento | MenuPrincipal, FabricaRepositorio, repositórios em memória e em arquivo | repositorio_memoria_deve_comecar_vazio, repositorio_binario_deve_persistir_entre_instancias, repositorio_personagem_binario_deve_persistir_entre_instancias | Implementado |
+| RF05 Escolher o armazenamento | MenuPrincipal, FabricaRepositorio, FabricaMemoria, FabricaArquivoBinario, EscolhaFabrica, repositórios em memória e em arquivo | escolher_fabrica_deve_devolver_a_fabrica_do_tipo_pedido, fabrica_memoria_deve_criar_repositorios_vazios, fabrica_memoria_deve_criar_repositorios_independentes, fabrica_arquivo_deve_criar_repositorios_que_persistem, fabrica_arquivo_deve_lancar_falha_com_arquivo_corrompido, repositorio_memoria_deve_comecar_vazio, repositorio_binario_deve_persistir_entre_instancias, repositorio_personagem_binario_deve_persistir_entre_instancias | Implementado |
 | RF06 Excluir usuário | ControleUsuarios, FacadeSingletonController | deve_excluir_usuario_existente, excluir_id_inexistente_deve_retornar_falso, excluir_usuario_deve_excluir_os_personagens_dele | Implementado |
 | RF08 Criar personagem | ControlePersonagem, regras de ficha, IPersonagemRepositorio | deve_criar_personagem_com_id_automatico, deve_recusar_personagem_de_usuario_inexistente, deve_recusar_personagem_com_ficha_invalida, deve_recusar_nome_de_personagem_vazio, deve_recusar_nome_de_personagem_com_31_caracteres, deve_recusar_nivel_fora_de_1_a_20, deve_recusar_pontos_de_vida_zerados, deve_recusar_atributo_fora_de_1_a_30 | Implementado |
 | RF09 Listar personagens | ControlePersonagem, MenuPersonagens, calcularModificador | modificador_deve_arredondar_para_baixo, repositorio_personagem_memoria_deve_fazer_crud | Implementado |
@@ -435,7 +460,7 @@ Testes em `test/testes.cpp`, `test/testes_personagem.cpp` e `test/testes_fachada
 | NF-SEG-01 Senha nunca exibida | MenuPrincipal, Excecoes.h | mensagens_de_erro_nao_devem_conter_a_senha | Implementado |
 | NF-SEG-02 Falha de login sem pista | — | — | Planejado com RF07 |
 | NF-MAN-01, NF-MAN-02 | IUsuarioRepositorio, IRegraValidacao | — (verificado por revisão do projeto) | Implementado |
-| NF-MAN-03 Testes automatizados | test/ | 44 testes | Implementado |
+| NF-MAN-03 Testes automatizados | test/ | 50 testes | Implementado |
 | NF-CON-01, NF-CON-02, NF-CON-03 | ArquivoBinario, repositórios em arquivo, FalhaArmazenamentoException | arquivo_binario_truncado_deve_lancar_falha_armazenamento, arquivo_binario_corrompido_deve_lancar_falha_armazenamento, arquivo_de_personagens_corrompido_deve_lancar_falha_armazenamento | Implementado |
 | NF-DES-01 Tempo de listagem e carga | RepositorioArquivoBinario | medição manual em 14/10/2026: carga de 10.000 usuários em ~11 ms e listagem em ~5 ms | Atendido |
 | NF-USA-01, NF-USA-03 | MenuPrincipal, Excecoes.h | — (verificado executando o programa) | Implementado |

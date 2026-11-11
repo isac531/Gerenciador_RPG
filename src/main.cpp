@@ -3,36 +3,27 @@
 
 #include "business/control/FacadeSingletonController.h"
 #include "business/exception/Excecoes.h"
-#include "infra/FabricaRepositorio.h"
+#include "infra/EscolhaFabrica.h"
 #include "ui/MenuPrincipal.h"
 
 namespace {
-
-struct Repositorios {
-    std::unique_ptr<IUsuarioRepositorio> usuarios;
-    std::unique_ptr<IPersonagemRepositorio> personagens;
-};
-
-Repositorios criarRepositorios(TipoArmazenamento tipo) {
-    return {criarRepositorioUsuarios(tipo), criarRepositorioPersonagens(tipo)};
-}
 
 // Se algum arquivo binario nao puder ser carregado, informa e usa a memoria (RAM).
 Repositorios montarRepositorios(TipoArmazenamento tipo) {
     if (tipo == TipoArmazenamento::MEMORIA) {
         std::cout << "Usando armazenamento em memoria (RAM).\n";
-        return criarRepositorios(TipoArmazenamento::MEMORIA);
+        return escolherFabrica(TipoArmazenamento::MEMORIA)->criarRepositorios();
     }
 
     try {
-        auto repositorios = criarRepositorios(TipoArmazenamento::ARQUIVO_BINARIO);
+        auto repositorios = escolherFabrica(TipoArmazenamento::ARQUIVO_BINARIO)->criarRepositorios();
         std::cout << "Usando arquivos binarios usuarios.dat e personagens.dat.\n";
         return repositorios;
     } catch (const FalhaArmazenamentoException& e) {
         std::cout << "Falha no armazenamento: " << e.what() << '\n'
                   << "Usando armazenamento em memoria (RAM); "
                      "os dados nao serao salvos.\n";
-        return criarRepositorios(TipoArmazenamento::MEMORIA);
+        return escolherFabrica(TipoArmazenamento::MEMORIA)->criarRepositorios();
     }
 }
 
