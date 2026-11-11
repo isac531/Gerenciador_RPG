@@ -11,6 +11,7 @@
 | [ADR-0002](adr/0002-login-e-papel-no-usuario.md) | Renomear `nome` para `login` e acrescentar o papel ao usuário | RF01, RF02, RF04 |
 | [ADR-0003](adr/0003-id-automatico.md) | Gerar o ID do usuário no repositório | RF01, NF-CON-02 |
 | [ADR-0004](adr/0004-fachada-singleton.md) | Fachada única com Singleton para os controles | RF08–RF12, NF-MAN-01 |
+| [ADR-0005](adr/0005-repository-e-factory-method.md) | Repository por entidade e Factory Method para escolher o armazenamento | RF05, NF-MAN-01 |
 
 ## Arquitetura lógica (Sprint 3)
 

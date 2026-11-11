@@ -7,7 +7,7 @@
 
 ```text
 src/
-├── main.cpp                  ← raiz de composição: cria os repositórios escolhidos (FabricaRepositorio), inicializa a fachada e abre o menu
+├── main.cpp                  ← raiz de composição: cria os repositórios escolhidos (`escolherFabrica(tipo)->criarRepositorios()`), inicializa a fachada e abre o menu
 ├── ui/                       ← fronteira: MenuPrincipal, MenuPersonagens, Console (leitura do teclado)
 ├── business/
 │   ├── model/                ← entidades: Usuario, Papel, Personagem, Ficha (com Atributos)
@@ -432,8 +432,8 @@ Nos dois arquivos, a gravação é feita num arquivo temporário (`.tmp`) que de
 | Injeção de dependência | S2 | ControleCriarConta recebe IUsuarioRepositorio no construtor | Trocar o armazenamento sem alterar o controle (NF-MAN-01) | [ADR-0001](07-arquitetura/adr/0001-persistencia-substituivel.md) |
 | Singleton | S3 | FacadeSingletonController (construtor privado, `getInstancia()` com `static` local, cópia proibida) | Uma única fachada para toda a aplicação, inicializada uma vez em `main.cpp` | [ADR-0004](07-arquitetura/adr/0004-fachada-singleton.md) |
 | Facade | S3 | FacadeSingletonController (fachada); ControleCriarConta, ControleUsuarios, ControlePersonagem (subsistema); MenuPrincipal, MenuPersonagens (clientes) | A `ui` usa um único ponto de entrada; operações entre entidades (exclusão em cascata, contagem de entidades) ficam no negócio | [ADR-0004](07-arquitetura/adr/0004-fachada-singleton.md) |
-| Repository | S4 | (iniciado na S2 e estendido na S3: IUsuarioRepositorio, IPersonagemRepositorio e suas implementações) | | |
-| Factory Method | S4 | FabricaRepositorio (Creator abstrato, na business; declara os factory methods `criarRepositorioUsuarios()` e `criarRepositorioPersonagens()`), FabricaMemoria e FabricaArquivoBinario (Creators concretos, na infra, decidem a classe instanciada), IUsuarioRepositorio e IPersonagemRepositorio (produtos), `escolherFabrica()` (seleciona o Creator a partir de TipoArmazenamento) | Escolher o tipo de repositório (RF05) sem `if` espalhado e sem que a business conheça classes da infra; novo mecanismo = nova subclasse (NF-MAN-01) | A registrar (ADR Repository + Factory) |
+| Repository | S4 | Interfaces IUsuarioRepositorio e IPersonagemRepositorio na business (só tipos do domínio); implementações em memória e em arquivo binário na infra | A business trata os dados como uma coleção em memória, sem saber onde ficam; regras de negócio ficam nos controles; os testes usam a versão em memória | [ADR-0005](07-arquitetura/adr/0005-repository-e-factory-method.md) |
+| Factory Method | S4 | FabricaRepositorio (Creator abstrato, na business; declara os factory methods `criarRepositorioUsuarios()` e `criarRepositorioPersonagens()`), FabricaMemoria e FabricaArquivoBinario (Creators concretos, na infra, decidem a classe instanciada), IUsuarioRepositorio e IPersonagemRepositorio (produtos), `escolherFabrica()` (seleciona o Creator a partir de TipoArmazenamento) | Escolher o tipo de repositório (RF05) sem `if` espalhado e sem que a business conheça classes da infra; novo mecanismo = nova subclasse (NF-MAN-01) | [ADR-0005](07-arquitetura/adr/0005-repository-e-factory-method.md) |
 | Adapter | S4 | | | |
 | Template Method | S4 | | | |
 | Command | S5 | | | |
