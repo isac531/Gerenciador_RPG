@@ -2,7 +2,7 @@
 
 - **Status:** aceito
 - **Data:** 2026-11-11
-- **Requisitos relacionados:** RF07, RF13, NF-SEG-01, NF-MAN-01, NF-POR-01
+- **Requisitos relacionados:** RF07, RF13, NF-SEG-01, NF-MAN-01, NF-POR-01 (modificado na change `relatorio-de-acessos` para aceitar bibliotecas copiadas em código-fonte)
 
 ## Contexto
 

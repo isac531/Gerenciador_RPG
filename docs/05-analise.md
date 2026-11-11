@@ -115,6 +115,8 @@ O diagrama de análise do sistema inteiro (campanhas, personagens, rolagens e pa
 
 ![Diagrama de classes de análise do sistema](diagramas/DiagramaClasses-analise.png)
 
+> Na Sprint 4 o diagrama ganhou as interfaces de repositório de cada entidade (`<<repository>>`) entre os controles e as entidades, e uma caixa para a camada de persistência. Como é um diagrama de **análise**, ele mostra só os contratos. As classes concretas de cada camada (repositórios em memória e em arquivo, fábricas, `RegistroAcesso`, Adapter e Template Method) aparecem no diagrama de **projeto** da S4.1, em [`08-projeto.md`](08-projeto.md) §2.
+
 Entidades principais e relacionamentos:
 
 ```mermaid
