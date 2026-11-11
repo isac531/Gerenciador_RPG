@@ -5,6 +5,7 @@
 #include <optional>
 #include <vector>
 
+#include "../log/ILogger.h"
 #include "../model/Personagem.h"
 #include "../model/Usuario.h"
 #include "../repository/IAcessoRepositorio.h"
@@ -30,11 +31,17 @@ public:
     FacadeSingletonController& operator=(const FacadeSingletonController&) = delete;
 
     // Liga os controles aos repositorios escolhidos. Chamar de novo troca
-    // os repositorios (usado pelos testes).
+    // os repositorios (usado pelos testes) e volta ao logger nulo.
     // O relogio do registro de acessos pode ser trocado nos testes.
     void inicializar(IUsuarioRepositorio& usuarios, IPersonagemRepositorio& personagens,
                      IAcessoRepositorio& acessos,
                      ControleLogin::Relogio relogio = ControleLogin::agora);
+
+    // Define onde a fachada registra os eventos (cadastros, logins,
+    // exclusoes, falhas de armazenamento). Chamar depois de inicializar();
+    // sem chamar, nada e registrado.
+    // O logger deve viver enquanto a fachada for usada.
+    void definirLogger(ILogger& logger);
 
     // ----- Usuarios (UC01, UC03, UC04) -----
     int criarConta(const Usuario& usuario);
@@ -68,9 +75,17 @@ private:
     ControleUsuarios& controleUsuarios() const;
     ControlePersonagem& controlePersonagem() const;
     ControleLogin& controleLogin() const;
+    ILogger& logger() const;
+
+    // Executa `operacao`; se ela lancar FalhaArmazenamentoException, registra
+    // o erro no log e relanca.
+    template <typename Operacao>
+    auto registrandoFalhaDeArmazenamento(const std::string& acao, Operacao operacao)
+        -> decltype(operacao());
 
     std::unique_ptr<ControleCriarConta> controleCriarConta_;
     std::unique_ptr<ControleUsuarios> controleUsuarios_;
     std::unique_ptr<ControlePersonagem> controlePersonagem_;
     std::unique_ptr<ControleLogin> controleLogin_;
+    ILogger* logger_ = nullptr;
 };

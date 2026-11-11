@@ -11,5 +11,6 @@ test_runner
 usuarios.dat
 personagens.dat
 acessos.dat
+rpg.log
 *.dat.tmp
 usuarios.txt
