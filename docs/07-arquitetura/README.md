@@ -26,12 +26,12 @@ flowchart TB
         controles["ControleCriarConta · ControleUsuarios · ControlePersonagem"]
         regras["validation: regras de login, senha e ficha"]
         modelo["model: Usuario, Papel, Personagem, Ficha"]
-        contratos["repository: IUsuarioRepositorio, IPersonagemRepositorio"]
+        contratos["repository: IUsuarioRepositorio, IPersonagemRepositorio, FabricaRepositorio"]
         excecoes["exception"]
     end
     subgraph infra["infra"]
         repos["RepositorioMemoria · RepositorioArquivoBinario<br/>RepositorioPersonagemMemoria · RepositorioPersonagemArquivoBinario"]
-        fabrica["FabricaRepositorio · ArquivoBinario"]
+        fabrica["FabricaMemoria · FabricaArquivoBinario · EscolhaFabrica · ArquivoBinario"]
     end
     main["main.cpp<br/>raiz de composição"]
 
