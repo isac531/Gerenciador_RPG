@@ -103,6 +103,15 @@ std::optional<Usuario> RepositorioArquivoBinario::buscar(int id) const {
     return encontrado->second;
 }
 
+std::optional<Usuario> RepositorioArquivoBinario::buscarPorLogin(const std::string& login) const {
+    for (const auto& entrada : usuarios_) {
+        if (entrada.second.getLogin() == login) {
+            return entrada.second;
+        }
+    }
+    return std::nullopt;
+}
+
 std::vector<Usuario> RepositorioArquivoBinario::listarTodos() const {
     std::vector<Usuario> todos;
     todos.reserve(usuarios_.size());

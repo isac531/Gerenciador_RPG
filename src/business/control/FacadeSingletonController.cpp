@@ -1,6 +1,7 @@
 #include "FacadeSingletonController.h"
 
 #include <stdexcept>
+#include <utility>
 
 namespace {
 
@@ -21,10 +22,13 @@ FacadeSingletonController& FacadeSingletonController::getInstancia() {
 }
 
 void FacadeSingletonController::inicializar(IUsuarioRepositorio& usuarios,
-                                            IPersonagemRepositorio& personagens) {
+                                            IPersonagemRepositorio& personagens,
+                                            IAcessoRepositorio& acessos,
+                                            ControleLogin::Relogio relogio) {
     controleCriarConta_ = std::make_unique<ControleCriarConta>(usuarios);
     controleUsuarios_ = std::make_unique<ControleUsuarios>(usuarios);
     controlePersonagem_ = std::make_unique<ControlePersonagem>(personagens, usuarios);
+    controleLogin_ = std::make_unique<ControleLogin>(usuarios, acessos, std::move(relogio));
 }
 
 ControleCriarConta& FacadeSingletonController::controleCriarConta() const {
@@ -37,6 +41,15 @@ ControleUsuarios& FacadeSingletonController::controleUsuarios() const {
 
 ControlePersonagem& FacadeSingletonController::controlePersonagem() const {
     return exigirInicializado(controlePersonagem_);
+}
+
+ControleLogin& FacadeSingletonController::controleLogin() const {
+    return exigirInicializado(controleLogin_);
+}
+
+Usuario FacadeSingletonController::fazerLogin(const std::string& login,
+                                              const std::string& senha) {
+    return controleLogin().autenticar(login, senha);
 }
 
 int FacadeSingletonController::criarConta(const Usuario& usuario) {

@@ -38,7 +38,8 @@ int main() {
 
     const Repositorios repositorios = montarRepositorios(*tipo);
     FacadeSingletonController& fachada = FacadeSingletonController::getInstancia();
-    fachada.inicializar(*repositorios.usuarios, *repositorios.personagens);
+    fachada.inicializar(*repositorios.usuarios, *repositorios.personagens,
+                        *repositorios.acessos);
 
     MenuPrincipal(fachada).executar();
     return 0;

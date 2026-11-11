@@ -7,9 +7,11 @@
 
 #include "../model/Personagem.h"
 #include "../model/Usuario.h"
+#include "../repository/IAcessoRepositorio.h"
 #include "../repository/IPersonagemRepositorio.h"
 #include "../repository/IUsuarioRepositorio.h"
 #include "ControleCriarConta.h"
+#include "ControleLogin.h"
 #include "ControlePersonagem.h"
 #include "ControleUsuarios.h"
 
@@ -18,7 +20,7 @@
 // controle do caso de uso e coordena operacoes que envolvem mais de um
 // controle, como excluir um usuario junto com os personagens dele.
 //
-// Uso: FacadeSingletonController::getInstancia().inicializar(usuarios, personagens)
+// Uso: FacadeSingletonController::getInstancia().inicializar(usuarios, personagens, acessos)
 // uma vez, na raiz de composicao (main.cpp); depois, so getInstancia().
 class FacadeSingletonController {
 public:
@@ -29,13 +31,21 @@ public:
 
     // Liga os controles aos repositorios escolhidos. Chamar de novo troca
     // os repositorios (usado pelos testes).
-    void inicializar(IUsuarioRepositorio& usuarios, IPersonagemRepositorio& personagens);
+    // O relogio do registro de acessos pode ser trocado nos testes.
+    void inicializar(IUsuarioRepositorio& usuarios, IPersonagemRepositorio& personagens,
+                     IAcessoRepositorio& acessos,
+                     ControleLogin::Relogio relogio = ControleLogin::agora);
 
     // ----- Usuarios (UC01, UC03, UC04) -----
     int criarConta(const Usuario& usuario);
     std::vector<Usuario> listarUsuarios() const;
     // Exclui o usuario e os personagens dele. Retorna false se o ID nao existir.
     bool excluirUsuario(int id);
+
+    // ----- Login (UC02) e registro de acessos (RF13) -----
+    // Registra a tentativa e retorna o usuario; lanca
+    // CredenciaisInvalidasException se login ou senha estiverem errados.
+    Usuario fazerLogin(const std::string& login, const std::string& senha);
 
     // ----- Personagens (UC07, UC12, UC13, UC14) -----
     int criarPersonagem(const Personagem& personagem);
@@ -57,8 +67,10 @@ private:
     ControleCriarConta& controleCriarConta() const;
     ControleUsuarios& controleUsuarios() const;
     ControlePersonagem& controlePersonagem() const;
+    ControleLogin& controleLogin() const;
 
     std::unique_ptr<ControleCriarConta> controleCriarConta_;
     std::unique_ptr<ControleUsuarios> controleUsuarios_;
     std::unique_ptr<ControlePersonagem> controlePersonagem_;
+    std::unique_ptr<ControleLogin> controleLogin_;
 };

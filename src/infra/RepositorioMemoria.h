@@ -11,6 +11,7 @@ public:
     bool remover(int id) override;
     bool existe(int id) const override;
     std::optional<Usuario> buscar(int id) const override;
+    std::optional<Usuario> buscarPorLogin(const std::string& login) const override;
     std::vector<Usuario> listarTodos() const override;
     std::size_t quantidade() const override;
 

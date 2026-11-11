@@ -46,6 +46,7 @@ void MenuPrincipal::executar() {
                      "3. Listar usuarios\n"
                      "4. Personagens\n"
                      "5. Quantidade de entidades cadastradas\n"
+                     "6. Entrar (login)\n"
                      "0. Sair\n";
 
         int opcao;
@@ -72,6 +73,9 @@ void MenuPrincipal::executar() {
             break;
         case 5:
             exibirQuantidadeEntidades();
+            break;
+        case 6:
+            if (!fazerLogin()) return;
             break;
         case 0:
             return;
@@ -123,6 +127,26 @@ bool MenuPrincipal::excluirUsuario() {
         } else {
             std::cout << "Usuario nao encontrado.\n";
         }
+    } catch (const FalhaArmazenamentoException& e) {
+        std::cout << "Falha no armazenamento: " << e.what() << '\n';
+    }
+
+    return true;
+}
+
+bool MenuPrincipal::fazerLogin() {
+    std::string login;
+    std::string senha;
+    if (!lerLinha("Login: ", login) || !lerLinha("Senha: ", senha)) {
+        return false;
+    }
+
+    try {
+        const Usuario usuario = fachada_.fazerLogin(login, senha);
+        std::cout << "Bem-vindo, " << usuario.getLogin() << " ("
+                  << papelParaTexto(usuario.getPapel()) << ").\n";
+    } catch (const CredenciaisInvalidasException& e) {
+        std::cout << e.what() << '\n';
     } catch (const FalhaArmazenamentoException& e) {
         std::cout << "Falha no armazenamento: " << e.what() << '\n';
     }
