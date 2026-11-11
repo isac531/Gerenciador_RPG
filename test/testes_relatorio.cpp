@@ -5,6 +5,7 @@
 #include "../src/business/control/FacadeSingletonController.h"
 #include "../src/business/report/GeradorRelatorioAcessos.h"
 #include "../src/business/report/RelatorioHtml.h"
+#include "../src/business/report/RelatorioPdf.h"
 #include "../src/infra/RepositorioAcessoMemoria.h"
 #include "../src/infra/RepositorioMemoria.h"
 #include "../src/infra/RepositorioPersonagemMemoria.h"
@@ -56,6 +57,21 @@ protected:
         return "ok";
     }
 };
+
+// Confere que cada entrada da tabela xref aponta para "N 0 obj".
+bool xrefConfere(const std::string& pdf) {
+    const std::size_t inicio = pdf.find("xref\n");
+    if (inicio == std::string::npos) return false;
+    std::size_t posicao = pdf.find('\n', pdf.find('\n', inicio + 5) + 1) + 1;  // pula "0 N" e a entrada livre
+    for (int objeto = 1; pdf.compare(posicao, 7, "trailer") != 0; ++objeto) {
+        const std::size_t deslocamento = std::stoul(pdf.substr(posicao, 10));
+        const std::string esperado = std::to_string(objeto) + " 0 obj";
+        if (pdf.compare(deslocamento, esperado.size(), esperado) != 0) return false;
+        posicao += 20;
+    }
+    return std::to_string(inicio) ==
+           pdf.substr(pdf.find("startxref\n") + 10, std::to_string(inicio).size());
+}
 
 }  // namespace
 
@@ -128,6 +144,33 @@ TESTE(relatorio_html_deve_escapar_caracteres_especiais) {
     VERIFICAR(RelatorioHtml::escapar("<b>&\"'") == "&lt;b&gt;&amp;&quot;&#39;");
 }
 
+TESTE(relatorio_pdf_deve_ser_um_pdf_valido_com_os_dados) {
+    CenarioRelatorio cenario;
+    RelatorioPdf pdf;
+    const std::string documento = pdf.gerar(cenario.controle.calcularEstatisticas());
+    VERIFICAR(pdf.extensao() == "pdf");
+    VERIFICAR(documento.rfind("%PDF-1.4\n", 0) == 0);
+    VERIFICAR(contem(documento, "/BaseFont /Helvetica"));
+    VERIFICAR(contem(documento, "(Relatorio de acessos) Tj"));
+    VERIFICAR(contem(documento, "Taxa de sucesso"));
+    VERIFICAR(contem(documento, "isac"));
+    VERIFICAR(documento.size() > 6 && documento.compare(documento.size() - 6, 6, "%%EOF\n") == 0);
+    VERIFICAR(xrefConfere(documento));
+}
+
+TESTE(relatorio_pdf_com_muitos_usuarios_deve_quebrar_em_paginas) {
+    RepositorioMemoria usuarios;
+    RepositorioAcessoMemoria acessos;
+    for (int i = 0; i < 120; ++i) {
+        usuarios.adicionar(Usuario("jogador", "Senha@123", Papel::JOGADOR));
+    }
+    RelatorioPdf pdf;
+    const std::string documento =
+        pdf.gerar(ControleRelatorioAcessos(usuarios, acessos).calcularEstatisticas());
+    VERIFICAR(!contem(documento, "/Count 1 "));
+    VERIFICAR(xrefConfere(documento));
+}
+
 TESTE(fachada_deve_gerar_relatorio_no_formato_pedido) {
     RepositorioMemoria usuarios;
     RepositorioPersonagemMemoria personagens;
@@ -135,6 +178,7 @@ TESTE(fachada_deve_gerar_relatorio_no_formato_pedido) {
     FacadeSingletonController& fachada = FacadeSingletonController::getInstancia();
     fachada.inicializar(usuarios, personagens, acessos);
     VERIFICAR(fachada.gerarRelatorioAcessos(FormatoRelatorio::HTML).extensao == "html");
-    VERIFICAR(formatoDeCodigo(1) == FormatoRelatorio::HTML);
+    VERIFICAR(fachada.gerarRelatorioAcessos(FormatoRelatorio::PDF).extensao == "pdf");
+    VERIFICAR(formatoDeCodigo(2) == FormatoRelatorio::PDF);
     VERIFICAR(!formatoDeCodigo(3));
 }

@@ -48,7 +48,7 @@ void MenuPrincipal::executar() {
                      "4. Personagens\n"
                      "5. Quantidade de entidades cadastradas\n"
                      "6. Entrar (login)\n"
-                     "7. Relatorio de acessos\n"
+                     "7. Relatorio de acessos (HTML ou PDF)\n"
                      "0. Sair\n";
 
         int opcao;
@@ -161,7 +161,7 @@ bool MenuPrincipal::fazerLogin() {
 
 bool MenuPrincipal::gerarRelatorioAcessos() {
     int codigo;
-    if (!lerInteiro("Formato (1. HTML): ", codigo)) {
+    if (!lerInteiro("Formato (1. HTML  2. PDF): ", codigo)) {
         std::cout << "Formato invalido.\n";
         return static_cast<bool>(std::cin);
     }

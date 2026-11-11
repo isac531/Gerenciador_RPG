@@ -11,7 +11,7 @@
 // Documento de relatorio pronto para gravar.
 struct RelatorioGerado {
     std::string conteudo;
-    std::string extensao;  // sem ponto, ex.: "html"
+    std::string extensao;  // sem ponto: "html" ou "pdf"
 };
 
 // Controle do caso de uso UC16 Gerar relatorio de acessos (RF14): calcula

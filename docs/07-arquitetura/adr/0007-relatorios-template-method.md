@@ -17,7 +17,8 @@ Os formatos diferem só na forma de escrever cada parte (tag HTML, operador de t
 - **Gancho (hook):** `textoRodape()`, com implementação padrão que as subclasses podem trocar.
 - **Subclasses concretas:**
   - `RelatorioHtml`: página única com CSS embutido; escapa `& < > " '`.
-- `EstatisticasAcesso` guarda os números, independentes de formato, e `ControleRelatorioAcessos` os calcula a partir de `IUsuarioRepositorio` e `IAcessoRepositorio`. `criarGeradorRelatorio(formato)` escolhe a subclasse. A fachada expõe `gerarRelatorioAcessos(formato)`, que devolve o conteúdo e a extensão. O menu grava `relatorio-acessos.<extensão>`.
+  - `RelatorioPdf`: PDF 1.4 escrito à mão, sem biblioteca. Usa as fontes padrão Helvetica e Courier, tabelas alinhadas em fonte monoespaçada, quebra em páginas A4 e monta a tabela `xref` com as posições de cada objeto.
+- `EstatisticasAcesso` guarda os números, independentes de formato, e `ControleRelatorioAcessos` os calcula a partir de `IUsuarioRepositorio` e `IAcessoRepositorio`. `criarGeradorRelatorio(formato)` escolhe a subclasse. A fachada expõe `gerarRelatorioAcessos(formato)`, que devolve o conteúdo e a extensão. O menu grava `relatorio-acessos.html` ou `relatorio-acessos.pdf`.
 
 ## Alternativas consideradas
 
@@ -25,8 +26,10 @@ Os formatos diferem só na forma de escrever cada parte (tag HTML, operador de t
 |---|---|
 | Uma função por formato montando o relatório inteiro | Duplica a ordem e o conteúdo das seções; um indicador novo teria de ser incluído em todos os formatos |
 | Strategy (um objeto "formatador" injetado num gerador concreto) | Também funcionaria, mas a sprint pede Template Method; aqui o algoritmo é fixo e só os passos variam, que é o caso típico do padrão |
+| Biblioteca de PDF (libharu, PoDoFo) | Dependência externa grande para compilar no Windows (NF-POR-01); o relatório só precisa de texto e tabelas, o que cabe em ~150 linhas |
+| Gerar o PDF convertendo o HTML | Exigiria um navegador ou ferramenta externa instalada |
 
 ## Consequências
 
 - Positivas: um formato novo (CSV, texto) é uma subclasse com seis métodos, sem tocar no conteúdo do relatório. Um indicador novo é incluído uma vez em `GeradorRelatorioAcessos` e aparece em todos os formatos. Um teste com uma subclasse espiã confere a ordem dos passos.
-- Negativas: as subclasses guardam estado entre os passos, por isso um mesmo gerador não deve ser usado por duas threads ao mesmo tempo.
+- Negativas: o PDF só aceita caracteres ASCII; os demais viram `?`, o que não é problema porque os textos do sistema não têm acento. Também não há gráficos. As subclasses guardam estado entre os passos, por isso um mesmo gerador não deve ser usado por duas threads ao mesmo tempo.
