@@ -12,5 +12,6 @@ usuarios.dat
 personagens.dat
 acessos.dat
 rpg.log
+relatorio-acessos.*
 *.dat.tmp
 usuarios.txt

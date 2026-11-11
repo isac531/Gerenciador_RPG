@@ -3,7 +3,8 @@ CXXFLAGS := -std=c++17 -Wall -Wextra -g
 CC       := gcc
 CFLAGS   := -std=c99 -Wall -Wextra -g
 DIRS     := ui business/model business/control business/exception \
-            business/validation business/repository business/log infra
+            business/validation business/repository business/log \
+            business/report infra
 LIB_SRCS := $(wildcard $(addsuffix /*.cpp,$(DIRS)))
 HDRS     := $(wildcard $(addsuffix /*.h,$(DIRS)))
 # Bibliotecas externas em C (ver infra/externo/): compiladas como C.

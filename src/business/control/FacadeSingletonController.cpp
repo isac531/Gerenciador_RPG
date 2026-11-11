@@ -31,6 +31,7 @@ void FacadeSingletonController::inicializar(IUsuarioRepositorio& usuarios,
     controleCriarConta_ = std::make_unique<ControleCriarConta>(usuarios);
     controleUsuarios_ = std::make_unique<ControleUsuarios>(usuarios);
     controlePersonagem_ = std::make_unique<ControlePersonagem>(personagens, usuarios);
+    controleRelatorio_ = std::make_unique<ControleRelatorioAcessos>(usuarios, acessos, relogio);
     controleLogin_ = std::make_unique<ControleLogin>(usuarios, acessos, std::move(relogio));
     logger_ = nullptr;
 }
@@ -49,6 +50,16 @@ ControlePersonagem& FacadeSingletonController::controlePersonagem() const {
 
 ControleLogin& FacadeSingletonController::controleLogin() const {
     return exigirInicializado(controleLogin_);
+}
+
+ControleRelatorioAcessos& FacadeSingletonController::controleRelatorio() const {
+    return exigirInicializado(controleRelatorio_);
+}
+
+RelatorioGerado FacadeSingletonController::gerarRelatorioAcessos(FormatoRelatorio formato) const {
+    RelatorioGerado relatorio = controleRelatorio().gerar(formato);
+    logger().info("Relatorio de acessos gerado em " + relatorio.extensao);
+    return relatorio;
 }
 
 void FacadeSingletonController::definirLogger(ILogger& logger) {

@@ -22,6 +22,7 @@ private:
     bool cadastrarUsuario();
     bool excluirUsuario();
     bool fazerLogin();
+    bool gerarRelatorioAcessos();
     void listarUsuarios() const;
     void exibirQuantidadeEntidades() const;
 

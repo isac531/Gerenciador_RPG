@@ -14,6 +14,7 @@
 #include "ControleCriarConta.h"
 #include "ControleLogin.h"
 #include "ControlePersonagem.h"
+#include "ControleRelatorioAcessos.h"
 #include "ControleUsuarios.h"
 
 // Fachada unica da camada de negocio (padroes Facade e Singleton, ADR-0004).
@@ -54,6 +55,10 @@ public:
     // CredenciaisInvalidasException se login ou senha estiverem errados.
     Usuario fazerLogin(const std::string& login, const std::string& senha);
 
+    // ----- Relatorio de acessos (UC16, RF14) -----
+    // Gera o relatorio no formato pedido (Template Method, ADR-0007).
+    RelatorioGerado gerarRelatorioAcessos(FormatoRelatorio formato) const;
+
     // ----- Personagens (UC07, UC12, UC13, UC14) -----
     int criarPersonagem(const Personagem& personagem);
     void editarPersonagem(int id, const Ficha& ficha);
@@ -75,6 +80,7 @@ private:
     ControleUsuarios& controleUsuarios() const;
     ControlePersonagem& controlePersonagem() const;
     ControleLogin& controleLogin() const;
+    ControleRelatorioAcessos& controleRelatorio() const;
     ILogger& logger() const;
 
     // Executa `operacao`; se ela lancar FalhaArmazenamentoException, registra
@@ -87,5 +93,6 @@ private:
     std::unique_ptr<ControleUsuarios> controleUsuarios_;
     std::unique_ptr<ControlePersonagem> controlePersonagem_;
     std::unique_ptr<ControleLogin> controleLogin_;
+    std::unique_ptr<ControleRelatorioAcessos> controleRelatorio_;
     ILogger* logger_ = nullptr;
 };

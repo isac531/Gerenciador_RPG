@@ -1,5 +1,6 @@
 #include "MenuPrincipal.h"
 
+#include <fstream>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -47,6 +48,7 @@ void MenuPrincipal::executar() {
                      "4. Personagens\n"
                      "5. Quantidade de entidades cadastradas\n"
                      "6. Entrar (login)\n"
+                     "7. Relatorio de acessos\n"
                      "0. Sair\n";
 
         int opcao;
@@ -76,6 +78,9 @@ void MenuPrincipal::executar() {
             break;
         case 6:
             if (!fazerLogin()) return;
+            break;
+        case 7:
+            if (!gerarRelatorioAcessos()) return;
             break;
         case 0:
             return;
@@ -151,6 +156,31 @@ bool MenuPrincipal::fazerLogin() {
         std::cout << "Falha no armazenamento: " << e.what() << '\n';
     }
 
+    return true;
+}
+
+bool MenuPrincipal::gerarRelatorioAcessos() {
+    int codigo;
+    if (!lerInteiro("Formato (1. HTML): ", codigo)) {
+        std::cout << "Formato invalido.\n";
+        return static_cast<bool>(std::cin);
+    }
+    const auto formato = formatoDeCodigo(codigo);
+    if (!formato) {
+        std::cout << "Formato invalido.\n";
+        return true;
+    }
+
+    const RelatorioGerado relatorio = fachada_.gerarRelatorioAcessos(*formato);
+    const std::string caminho = "relatorio-acessos." + relatorio.extensao;
+    std::ofstream arquivo(caminho, std::ios::binary | std::ios::trunc);
+    arquivo << relatorio.conteudo;
+    arquivo.close();
+    if (!arquivo) {
+        std::cout << "Nao foi possivel gravar o arquivo " << caminho << ".\n";
+    } else {
+        std::cout << "Relatorio gravado em " << caminho << ".\n";
+    }
     return true;
 }
 
