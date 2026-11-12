@@ -52,7 +52,15 @@ feat/x   fix/y     refactor/z   ← branches de trabalho (curta duração)
 
 5. Em cada data de entrega (docs/00-entregas.md):
    PR develop → main  +  tag da versão (v0.1.0, v0.2.0, ...)
+
+6. Logo depois do merge da release, sincronizar develop com main
+   (o merge develop → main cria um commit que só existe em main):
+   git checkout develop && git pull
+   git merge --no-edit origin/main && git push
+   (ou abrir um PR main → develop)
 ```
+
+> **Por que o passo 6?** Sem ele, o GitHub mostra `develop` "N commits atrás de `main`" depois de cada release, e quem olha a `develop` não vê a versão entregue. As branches de trabalho podem ser apagadas depois do merge; **a `develop` nunca é apagada** e nenhum PR de funcionalidade vai direto para `main`.
 
 ### Hotfix (bug crítico em produção)
 
@@ -138,7 +146,7 @@ docs/entrega-2-sprint-3
 - Nunca commitar diretamente em `main` ou `develop`
 - Branches de feature e fix partem de `develop` (ver seção 1)
 - Hotfixes partem de `main` e são integrados em `main` e `develop`
-- Delete a branch após o merge
+- Delete a branch de trabalho após o merge (nunca `develop` nem `main`)
 
 ---
 
@@ -239,6 +247,9 @@ Não é refactoring massivo — é renomear uma variável confusa, extrair um bl
 - `ui` → `business` ← `infra` (ver [`docs/08-projeto.md`](docs/08-projeto.md)). A `business` não inclui nada de `ui` nem de `infra`.
 - A `ui` fala **só** com a `FacadeSingletonController` ([ADR-0004](docs/07-arquitetura/adr/0004-fachada-singleton.md)). Caso de uso novo = método novo na fachada que delega a um controle.
 - Os controles recebem as interfaces de repositório no construtor; só `main.cpp` conhece as classes concretas de `infra`.
+- Entidade persistida nova = interface `I<Entidade>Repositorio` em `business/repository` + *factory method* em `FabricaRepositorio` + implementação em memória e em arquivo na `infra`, criadas pelas fábricas concretas ([ADR-0005](docs/07-arquitetura/adr/0005-repository-e-factory-method.md)). Regra de negócio nunca vai dentro do repositório.
+- Biblioteca de terceiros: copiada sem alterações em `src/infra/externo/<nome>/` com a licença, e usada só por um adaptador na `infra` que implementa uma interface da `business` ([ADR-0006](docs/07-arquitetura/adr/0006-adapter-log.md)).
+- Log: use o `ILogger` da fachada; **nunca** registre a senha (NF-SEG-01).
 - IDs de entidades são gerados pelo repositório e nunca reaproveitados ([ADR-0003](docs/07-arquitetura/adr/0003-id-automatico.md)).
 - Regra de validação nova = nova classe que implementa `IRegraValidacao` ou `IRegraFicha`, registrada no construtor do controle (Strategy).
 - Erros de dado do usuário viram exceções específicas, tratadas na `ui` com mensagem que diz a regra violada; erros de E/S viram `FalhaArmazenamentoException`.

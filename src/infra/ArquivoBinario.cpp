@@ -29,6 +29,12 @@ void escreverInt32(std::ostream& saida, std::int32_t valor) {
     escreverUint32(saida, static_cast<std::uint32_t>(valor));
 }
 
+void escreverInt64(std::ostream& saida, std::int64_t valor) {
+    const auto bruto = static_cast<std::uint64_t>(valor);
+    escreverUint32(saida, static_cast<std::uint32_t>(bruto & 0xFFFFFFFFu));
+    escreverUint32(saida, static_cast<std::uint32_t>(bruto >> 32));
+}
+
 void escreverUint8(std::ostream& saida, std::uint8_t valor) {
     saida.put(static_cast<char>(valor));
 }
@@ -55,6 +61,17 @@ std::int32_t lerInt32(std::istream& entrada) {
     }
     // Complemento de dois sem depender de conversao definida pela implementacao.
     return static_cast<std::int32_t>(bruto - 0x80000000u) + std::numeric_limits<std::int32_t>::min();
+}
+
+std::int64_t lerInt64(std::istream& entrada) {
+    const std::uint64_t baixo = lerUint32(entrada);
+    const std::uint64_t alto = lerUint32(entrada);
+    const std::uint64_t bruto = (alto << 32) | baixo;
+    if (bruto <= static_cast<std::uint64_t>(std::numeric_limits<std::int64_t>::max())) {
+        return static_cast<std::int64_t>(bruto);
+    }
+    return static_cast<std::int64_t>(bruto - 0x8000000000000000u) +
+           std::numeric_limits<std::int64_t>::min();
 }
 
 std::uint8_t lerUint8(std::istream& entrada) {

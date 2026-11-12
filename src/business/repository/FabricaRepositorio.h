@@ -2,6 +2,7 @@
 
 #include <memory>
 
+#include "IAcessoRepositorio.h"
 #include "IPersonagemRepositorio.h"
 #include "IUsuarioRepositorio.h"
 #include "TipoArmazenamento.h"
@@ -10,6 +11,7 @@
 struct Repositorios {
     std::unique_ptr<IUsuarioRepositorio> usuarios;
     std::unique_ptr<IPersonagemRepositorio> personagens;
+    std::unique_ptr<IAcessoRepositorio> acessos;
 };
 
 // Factory Method (padrao de criacao), no papel de Creator.
@@ -34,6 +36,7 @@ public:
     // ----- Factory methods (implementados pelas subclasses) -----
     virtual std::unique_ptr<IUsuarioRepositorio> criarRepositorioUsuarios() const = 0;
     virtual std::unique_ptr<IPersonagemRepositorio> criarRepositorioPersonagens() const = 0;
+    virtual std::unique_ptr<IAcessoRepositorio> criarRepositorioAcessos() const = 0;
 
     // Mecanismo de armazenamento que esta fabrica produz.
     virtual TipoArmazenamento tipo() const = 0;
@@ -44,6 +47,7 @@ public:
         Repositorios repositorios;
         repositorios.usuarios = criarRepositorioUsuarios();
         repositorios.personagens = criarRepositorioPersonagens();
+        repositorios.acessos = criarRepositorioAcessos();
         return repositorios;
     }
 };

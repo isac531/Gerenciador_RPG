@@ -1,5 +1,6 @@
 #include "MenuPrincipal.h"
 
+#include <fstream>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -17,7 +18,7 @@ std::optional<TipoArmazenamento> MenuPrincipal::escolherArmazenamento() {
         int opcao;
         if (!lerInteiro("Escolha o armazenamento:\n"
                         "1. Memoria (RAM)\n"
-                        "2. Arquivo binario (usuarios.dat e personagens.dat)\n"
+                        "2. Arquivo binario (usuarios.dat, personagens.dat e acessos.dat)\n"
                         "Opcao: ",
                         opcao)) {
             if (!std::cin) {
@@ -46,6 +47,8 @@ void MenuPrincipal::executar() {
                      "3. Listar usuarios\n"
                      "4. Personagens\n"
                      "5. Quantidade de entidades cadastradas\n"
+                     "6. Entrar (login)\n"
+                     "7. Relatorio de acessos (HTML ou PDF)\n"
                      "0. Sair\n";
 
         int opcao;
@@ -72,6 +75,12 @@ void MenuPrincipal::executar() {
             break;
         case 5:
             exibirQuantidadeEntidades();
+            break;
+        case 6:
+            if (!fazerLogin()) return;
+            break;
+        case 7:
+            if (!gerarRelatorioAcessos()) return;
             break;
         case 0:
             return;
@@ -127,6 +136,51 @@ bool MenuPrincipal::excluirUsuario() {
         std::cout << "Falha no armazenamento: " << e.what() << '\n';
     }
 
+    return true;
+}
+
+bool MenuPrincipal::fazerLogin() {
+    std::string login;
+    std::string senha;
+    if (!lerLinha("Login: ", login) || !lerLinha("Senha: ", senha)) {
+        return false;
+    }
+
+    try {
+        const Usuario usuario = fachada_.fazerLogin(login, senha);
+        std::cout << "Bem-vindo, " << usuario.getLogin() << " ("
+                  << papelParaTexto(usuario.getPapel()) << ").\n";
+    } catch (const CredenciaisInvalidasException& e) {
+        std::cout << e.what() << '\n';
+    } catch (const FalhaArmazenamentoException& e) {
+        std::cout << "Falha no armazenamento: " << e.what() << '\n';
+    }
+
+    return true;
+}
+
+bool MenuPrincipal::gerarRelatorioAcessos() {
+    int codigo;
+    if (!lerInteiro("Formato (1. HTML  2. PDF): ", codigo)) {
+        std::cout << "Formato invalido.\n";
+        return static_cast<bool>(std::cin);
+    }
+    const auto formato = formatoDeCodigo(codigo);
+    if (!formato) {
+        std::cout << "Formato invalido.\n";
+        return true;
+    }
+
+    const RelatorioGerado relatorio = fachada_.gerarRelatorioAcessos(*formato);
+    const std::string caminho = "relatorio-acessos." + relatorio.extensao;
+    std::ofstream arquivo(caminho, std::ios::binary | std::ios::trunc);
+    arquivo << relatorio.conteudo;
+    arquivo.close();
+    if (!arquivo) {
+        std::cout << "Nao foi possivel gravar o arquivo " << caminho << ".\n";
+    } else {
+        std::cout << "Relatorio gravado em " << caminho << ".\n";
+    }
     return true;
 }
 

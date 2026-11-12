@@ -3,6 +3,7 @@
 
 #include "../src/business/exception/Excecoes.h"
 #include "../src/business/model/Personagem.h"
+#include "../src/business/model/RegistroAcesso.h"
 #include "../src/business/model/Usuario.h"
 #include "../src/business/repository/FabricaRepositorio.h"
 #include "../src/infra/EscolhaFabrica.h"
@@ -44,8 +45,11 @@ TESTE(fabrica_memoria_deve_criar_repositorios_vazios) {
     auto personagens = fabrica.criarRepositorioPersonagens();
     VERIFICAR(usuarios != nullptr);
     VERIFICAR(personagens != nullptr);
+    auto acessos = fabrica.criarRepositorioAcessos();
     VERIFICAR(usuarios->quantidade() == 0);
     VERIFICAR(personagens->quantidade() == 0);
+    VERIFICAR(acessos != nullptr);
+    VERIFICAR(acessos->quantidade() == 0);
 }
 
 TESTE(fabrica_memoria_deve_criar_repositorios_independentes) {
@@ -62,18 +66,22 @@ TESTE(fabrica_memoria_deve_criar_repositorios_independentes) {
 TESTE(fabrica_arquivo_deve_criar_repositorios_que_persistem) {
     ArquivoTemporario arquivoUsuarios("fabrica_usuarios.dat");
     ArquivoTemporario arquivoPersonagens("fabrica_personagens.dat");
-    FabricaArquivoBinario fabrica(arquivoUsuarios.caminho(), arquivoPersonagens.caminho());
+    ArquivoTemporario arquivoAcessos("fabrica_acessos.dat");
+    FabricaArquivoBinario fabrica(arquivoUsuarios.caminho(), arquivoPersonagens.caminho(),
+                                  arquivoAcessos.caminho());
 
     int idDono = 0;
     {
         Repositorios repositorios = fabrica.criarRepositorios();
         idDono = repositorios.usuarios->adicionar(usuarioExemplo());
         repositorios.personagens->adicionar(Personagem(idDono, fichaExemplo()));
+        repositorios.acessos->adicionar(RegistroAcesso("isac", idDono, 1794398400, true));
     }
 
     Repositorios reaberto = fabrica.criarRepositorios();
     VERIFICAR(reaberto.usuarios->quantidade() == 1);
     VERIFICAR(reaberto.personagens->quantidade() == 1);
+    VERIFICAR(reaberto.acessos->quantidade() == 1);
     VERIFICAR(reaberto.usuarios->buscar(idDono)->getLogin() == "isac");
 }
 
@@ -93,4 +101,5 @@ TESTE(criar_repositorios_deve_funcionar_por_ponteiro_para_a_classe_abstrata) {
     Repositorios repositorios = fabrica->criarRepositorios();
     VERIFICAR(repositorios.usuarios != nullptr);
     VERIFICAR(repositorios.personagens != nullptr);
+    VERIFICAR(repositorios.acessos != nullptr);
 }

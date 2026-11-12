@@ -103,10 +103,10 @@ O sistema DEVE listar todos os usuários cadastrados, exibindo ID, login e papel
 - **THEN** o sistema exibe "Nenhum usuario cadastrado."
 
 ### Requirement: RF05 — Escolher o armazenamento
-O sistema DEVE perguntar, no início da execução, onde os usuários e os personagens serão armazenados: em memória (RAM) ou em arquivo binário (`usuarios.dat` e `personagens.dat`); no arquivo binário, os dados já gravados DEVEM ser carregados ao iniciar.
+O sistema DEVE perguntar, no início da execução, onde os usuários, os personagens e os registros de acesso serão armazenados: em memória (RAM) ou em arquivo binário (`usuarios.dat`, `personagens.dat` e `acessos.dat`); no arquivo binário, os dados já gravados DEVEM ser carregados ao iniciar.
 
 **Prioridade:** Essencial
-**Casos de uso:** UC01, UC03, UC04, UC07, UC12, UC13, UC14
+**Casos de uso:** UC01, UC02, UC03, UC04, UC07, UC12, UC13, UC14, UC16
 
 #### Scenario: Armazenamento em memória
 - **GIVEN** o sistema é iniciado com a opção "Memoria"
@@ -115,8 +115,8 @@ O sistema DEVE perguntar, no início da execução, onde os usuários e os perso
 
 #### Scenario: Armazenamento em arquivo binário
 - **GIVEN** o sistema é iniciado com a opção "Arquivo binario"
-- **WHEN** 2 usuários e 1 personagem são cadastrados, o sistema é fechado e iniciado de novo com a mesma opção
-- **THEN** a listagem exibe os mesmos 2 usuários e a listagem de personagens exibe o mesmo personagem
+- **WHEN** 2 usuários e 1 personagem são cadastrados, 1 login é feito, o sistema é fechado e iniciado de novo com a mesma opção
+- **THEN** a listagem exibe os mesmos 2 usuários, a listagem de personagens exibe o mesmo personagem e o relatório de acessos mostra 1 tentativa
 
 ### Requirement: RF06 — Excluir usuário
 O sistema DEVE permitir excluir um usuário pelo ID, excluindo também os personagens dele, e informar quando o ID não existe.

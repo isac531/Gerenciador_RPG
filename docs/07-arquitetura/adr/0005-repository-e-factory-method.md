@@ -16,10 +16,11 @@ Até a Sprint 3, cada entidade tinha uma interface de repositório (`IUsuarioRep
 |---|---|---|
 | Usuário | `IUsuarioRepositorio` | `RepositorioMemoria`, `RepositorioArquivoBinario` (`usuarios.dat`) |
 | Personagem | `IPersonagemRepositorio` | `RepositorioPersonagemMemoria`, `RepositorioPersonagemArquivoBinario` (`personagens.dat`) |
+| Registro de acesso | `IAcessoRepositorio` (só `adicionar` e consultas: o histórico não se altera) | `RepositorioAcessoMemoria`, `RepositorioAcessoArquivoBinario` (`acessos.dat`) |
 
 Os controles recebem as interfaces pelo construtor e não conhecem a `infra`. Regras de negócio (login repetido, dono existente, ficha válida) ficam nos controles, nunca no repositório. A versão em memória é também o *test double* dos testes de unidade.
 
-**Factory Method (GoF).** `FabricaRepositorio` (classe abstrata em `business/repository`, papel de *Creator*) declara um *factory method* por entidade (`criarRepositorioUsuarios()`, `criarRepositorioPersonagens()`, ...) e a operação `criarRepositorios()`, que monta o conjunto completo sem conhecer as classes concretas. `FabricaMemoria` e `FabricaArquivoBinario` (na `infra`, *Creators* concretos) decidem qual classe instanciar. `escolherFabrica(tipo)` (`infra/EscolhaFabrica`) é o único lugar com `if` sobre `TipoArmazenamento`; o `main.cpp` chama `escolherFabrica(tipo)->criarRepositorios()`.
+**Factory Method (GoF).** `FabricaRepositorio` (classe abstrata em `business/repository`, papel de *Creator*) declara um *factory method* por entidade (`criarRepositorioUsuarios()`, `criarRepositorioPersonagens()`, `criarRepositorioAcessos()`) e a operação `criarRepositorios()`, que monta o conjunto completo sem conhecer as classes concretas. `FabricaMemoria` e `FabricaArquivoBinario` (na `infra`, *Creators* concretos) decidem qual classe instanciar. `escolherFabrica(tipo)` (`infra/EscolhaFabrica`) é o único lugar com `if` sobre `TipoArmazenamento`; o `main.cpp` chama `escolherFabrica(tipo)->criarRepositorios()`.
 
 As funções livres antigas (`infra/FabricaRepositorio.h/.cpp`) foram removidas: depois da fábrica nova, nada mais as chamava.
 
