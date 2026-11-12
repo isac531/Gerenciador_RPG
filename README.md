@@ -12,7 +12,7 @@ Projeto da disciplina **Métodos e Projeto de Software** (UFPB · Centro de Info
 
 ## 1. Como compilar e executar
 
-Requisitos: g++ com suporte a C++17 e `make` (no Windows, MinGW).
+Requisitos: g++ com suporte a C++17, gcc e `make` (no Windows, MinGW, que já traz os dois compiladores). A biblioteca de log [rxi/log.c](https://github.com/rxi/log.c) já vem no repositório, em `src/infra/externo/logc`; não é preciso instalar nada.
 
 ```bash
 cd src
@@ -21,18 +21,18 @@ make          # compila o executável rpg
 make test     # compila e executa os testes automatizados
 ```
 
-Ao iniciar, o sistema pergunta onde guardar os usuários e os personagens (RF05):
+Ao iniciar, o sistema pergunta onde guardar os usuários, os personagens e os registros de acesso (RF05):
 
 ```text
 Escolha o armazenamento:
 1. Memoria (RAM)
-2. Arquivo binario (usuarios.dat e personagens.dat)
+2. Arquivo binario (usuarios.dat, personagens.dat e acessos.dat)
 ```
 
 - **Memória:** os dados ficam em coleções em RAM e se perdem ao fechar o programa.
-- **Arquivo binário:** os dados são carregados de `usuarios.dat` e `personagens.dat` (na pasta de onde o programa é executado) e cada alteração é gravada na hora. Falhas de leitura ou gravação são tratadas e informadas sem encerrar o programa (NF-CON-01).
+- **Arquivo binário:** os dados são carregados de `usuarios.dat`, `personagens.dat` e `acessos.dat` (na pasta de onde o programa é executado) e cada alteração é gravada na hora. Falhas de leitura ou gravação são tratadas e informadas sem encerrar o programa (NF-CON-01).
 
-No menu principal é possível cadastrar, listar e excluir usuários (o ID é gerado pelo sistema), abrir o menu de **personagens** (criar, listar, editar a ficha e excluir) e consultar a **quantidade de entidades cadastradas**. Toda a interface passa pela fachada única `FacadeSingletonController` (Facade + Singleton).
+No menu principal é possível cadastrar, listar e excluir usuários (o ID é gerado pelo sistema), abrir o menu de **personagens** (criar, listar, editar a ficha e excluir) consultar a **quantidade de entidades cadastradas**, **entrar com login e senha** (cada tentativa fica registrada) e gerar o **relatório de acessos** em HTML ou PDF (`relatorio-acessos.html` / `.pdf`). Toda a interface passa pela fachada única `FacadeSingletonController` (Facade + Singleton). Os eventos (cadastros, logins, exclusões, falhas) são registrados em `rpg.log`.
 
 As senhas são gravadas sem criptografia no arquivo; não use senhas reais.
 
@@ -61,7 +61,7 @@ As senhas são gravadas sem criptografia no arquivo; não use senhas reais.
 | Tipo (Sommerville) | Requisitos |
 |---|---|
 | **Produto**: como o sistema deve se comportar | NF-SEG-01, NF-SEG-02 (segurança); NF-CON-01 a NF-CON-03 (confiabilidade); NF-DES-01 (desempenho); NF-USA-01 a NF-USA-03 (usabilidade); NF-POR-02 (portabilidade dos dados) |
-| **Organizacional**: decorrem de políticas e do processo da equipe | NF-MAN-01 a NF-MAN-03 (manutenibilidade e testes); NF-POR-01 (C++17 com g++, sem bibliotecas externas) |
+| **Organizacional**: decorrem de políticas e do processo da equipe | NF-MAN-01 a NF-MAN-03 (manutenibilidade e testes); NF-POR-01 (C++17 com g++, sem nada a instalar) |
 | **Externo**: vêm de fora do sistema | Regras de senha da política padrão do AWS IAM (RF03, restrição R2); regras de jogo do SRD 5.1 (restrição R4) |
 
 ---

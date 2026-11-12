@@ -5,6 +5,7 @@
 
 | Termo | Definição | Sinônimos a evitar | Exemplo |
 |---|---|---|---|
+| **Acesso** | Tentativa de entrar no sistema com login e senha (UC02). Fica registrada com o login, a data e hora e o resultado: *aceito* ou *recusado* (RF13). | sessão, visita | `isac`, 11/11/2026 21:20, aceito |
 | **Armazenamento** | Mecanismo em que o sistema guarda os usuários durante a execução, escolhido ao iniciar: *memória* (dados perdidos ao fechar) ou *arquivo binário* (dados mantidos entre execuções). | persistência (no texto para o usuário), banco | "Armazenamento: arquivo binário `usuarios.dat`" |
 | **Atributo** | Uma das seis medidas básicas de um personagem: Força, Destreza, Constituição, Inteligência, Sabedoria e Carisma. Valor inteiro, normalmente de 1 a 20. | característica, stat | Força 16 |
 | **Bônus de proficiência** | Valor somado a testes em que o personagem é treinado; depende do nível (+2 do nível 1 ao 4, até +6 no nível 17 em diante). | bônus de treino | Nível 5 → +3 |
@@ -23,6 +24,7 @@
 | **Participação** | Vínculo entre um personagem e uma campanha, com data de entrada e status (ativa, saiu). | inscrição, matrícula | — |
 | **Personagem** | Figura fictícia controlada por um Jogador dentro de uma campanha, descrita por uma ficha. | PJ, boneco, char | Thorin, anão guerreiro nível 3 |
 | **Pontos de vida (PV)** | Quantidade de dano que um personagem aguenta; ao chegar a 0, ele fica inconsciente. | vida, HP, saúde | 27 PV |
+| **Relatório de acessos** | Documento em HTML ou PDF com as estatísticas de acesso dos usuários: tentativas, taxa de sucesso, usuário mais ativo e acessos por usuário (RF14). | log, extrato | `relatorio-acessos.pdf` |
 | **Rolagem** | Lançamento de um ou mais dados de um mesmo tipo somado a um modificador, escrito *NdX+M*. O sistema registra o resultado, o autor e a data e hora. | jogada, roll | 2D6+3 = 11 |
 | **Senha** | Segredo usado com o login para autenticar o usuário. Segue a política padrão do AWS IAM (RF03) e nunca é exibida. | password, código | — |
 | **Teste** | Rolagem de D20 somada a um modificador (e ao bônus de proficiência, quando cabe) e comparada com uma classe de dificuldade. | check, verificação | Teste de Destreza: D20+2 contra CD 12 |
