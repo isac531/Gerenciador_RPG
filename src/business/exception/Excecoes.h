@@ -34,6 +34,14 @@ public:
         : LoginInvalidoException("Login ja esta em uso.") {}
 };
 
+// Falha de autenticacao (RF07, NF-SEG-02): a mensagem nao diz se o erro
+// foi no login ou na senha.
+class CredenciaisInvalidasException : public std::runtime_error {
+public:
+    CredenciaisInvalidasException()
+        : std::runtime_error("Login ou senha invalidos.") {}
+};
+
 // ---------- Excecoes de senha (SenhaInvalidaException) ----------
 class SenhaInvalidaException : public std::runtime_error {
 public:

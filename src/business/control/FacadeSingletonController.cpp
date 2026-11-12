@@ -1,6 +1,10 @@
 #include "FacadeSingletonController.h"
 
+#include "../exception/Excecoes.h"
+
 #include <stdexcept>
+#include <string>
+#include <utility>
 
 namespace {
 
@@ -21,10 +25,15 @@ FacadeSingletonController& FacadeSingletonController::getInstancia() {
 }
 
 void FacadeSingletonController::inicializar(IUsuarioRepositorio& usuarios,
-                                            IPersonagemRepositorio& personagens) {
+                                            IPersonagemRepositorio& personagens,
+                                            IAcessoRepositorio& acessos,
+                                            ControleLogin::Relogio relogio) {
     controleCriarConta_ = std::make_unique<ControleCriarConta>(usuarios);
     controleUsuarios_ = std::make_unique<ControleUsuarios>(usuarios);
     controlePersonagem_ = std::make_unique<ControlePersonagem>(personagens, usuarios);
+    controleRelatorio_ = std::make_unique<ControleRelatorioAcessos>(usuarios, acessos, relogio);
+    controleLogin_ = std::make_unique<ControleLogin>(usuarios, acessos, std::move(relogio));
+    logger_ = nullptr;
 }
 
 ControleCriarConta& FacadeSingletonController::controleCriarConta() const {
@@ -39,8 +48,69 @@ ControlePersonagem& FacadeSingletonController::controlePersonagem() const {
     return exigirInicializado(controlePersonagem_);
 }
 
+ControleLogin& FacadeSingletonController::controleLogin() const {
+    return exigirInicializado(controleLogin_);
+}
+
+ControleRelatorioAcessos& FacadeSingletonController::controleRelatorio() const {
+    return exigirInicializado(controleRelatorio_);
+}
+
+RelatorioGerado FacadeSingletonController::gerarRelatorioAcessos(FormatoRelatorio formato) const {
+    RelatorioGerado relatorio = controleRelatorio().gerar(formato);
+    logger().info("Relatorio de acessos gerado em " + relatorio.extensao);
+    return relatorio;
+}
+
+void FacadeSingletonController::definirLogger(ILogger& logger) {
+    logger_ = &logger;
+}
+
+ILogger& FacadeSingletonController::logger() const {
+    static LoggerNulo nulo;
+    return logger_ != nullptr ? *logger_ : nulo;
+}
+
+template <typename Operacao>
+auto FacadeSingletonController::registrandoFalhaDeArmazenamento(const std::string& acao,
+                                                                Operacao operacao)
+    -> decltype(operacao()) {
+    try {
+        return operacao();
+    } catch (const FalhaArmazenamentoException& e) {
+        logger().erro(acao + ": " + e.what());
+        throw;
+    }
+}
+
+Usuario FacadeSingletonController::fazerLogin(const std::string& login,
+                                              const std::string& senha) {
+    try {
+        Usuario usuario = registrandoFalhaDeArmazenamento(
+            "Falha ao registrar acesso", [&] { return controleLogin().autenticar(login, senha); });
+        logger().info("Login aceito: " + login);
+        return usuario;
+    } catch (const CredenciaisInvalidasException&) {
+        logger().aviso("Login recusado: " + login);
+        throw;
+    }
+}
+
 int FacadeSingletonController::criarConta(const Usuario& usuario) {
-    return controleCriarConta().criarConta(usuario);
+    // A senha nunca vai para o log (NF-SEG-01); as mensagens das excecoes
+    // de senha tambem nao a repetem.
+    try {
+        const int id = registrandoFalhaDeArmazenamento(
+            "Falha ao criar conta", [&] { return controleCriarConta().criarConta(usuario); });
+        logger().info("Conta criada: ID " + std::to_string(id) + ", login " + usuario.getLogin());
+        return id;
+    } catch (const LoginInvalidoException& e) {
+        logger().aviso("Cadastro recusado (" + usuario.getLogin() + "): " + e.what());
+        throw;
+    } catch (const SenhaInvalidaException& e) {
+        logger().aviso("Cadastro recusado (" + usuario.getLogin() + "): " + e.what());
+        throw;
+    }
 }
 
 std::vector<Usuario> FacadeSingletonController::listarUsuarios() const {
@@ -50,20 +120,37 @@ std::vector<Usuario> FacadeSingletonController::listarUsuarios() const {
 bool FacadeSingletonController::excluirUsuario(int id) {
     // Personagens primeiro: se a exclusao falhar no meio, o usuario continua
     // existindo e nenhum personagem fica sem dono.
-    controlePersonagem().excluirDoDono(id);
-    return controleUsuarios().excluirConta(id);
+    return registrandoFalhaDeArmazenamento("Falha ao excluir usuario", [&] {
+        controlePersonagem().excluirDoDono(id);
+        const bool excluido = controleUsuarios().excluirConta(id);
+        if (excluido) {
+            logger().info("Usuario excluido: ID " + std::to_string(id));
+        }
+        return excluido;
+    });
 }
 
 int FacadeSingletonController::criarPersonagem(const Personagem& personagem) {
-    return controlePersonagem().criar(personagem);
+    const int id = registrandoFalhaDeArmazenamento(
+        "Falha ao criar personagem", [&] { return controlePersonagem().criar(personagem); });
+    logger().info("Personagem criado: ID " + std::to_string(id) + ", dono " +
+                  std::to_string(personagem.getIdDono()));
+    return id;
 }
 
 void FacadeSingletonController::editarPersonagem(int id, const Ficha& ficha) {
-    controlePersonagem().editarFicha(id, ficha);
+    registrandoFalhaDeArmazenamento("Falha ao editar personagem",
+                                    [&] { controlePersonagem().editarFicha(id, ficha); });
+    logger().info("Ficha editada: personagem ID " + std::to_string(id));
 }
 
 bool FacadeSingletonController::excluirPersonagem(int id) {
-    return controlePersonagem().excluir(id);
+    const bool excluido = registrandoFalhaDeArmazenamento(
+        "Falha ao excluir personagem", [&] { return controlePersonagem().excluir(id); });
+    if (excluido) {
+        logger().info("Personagem excluido: ID " + std::to_string(id));
+    }
+    return excluido;
 }
 
 std::optional<Personagem> FacadeSingletonController::buscarPersonagem(int id) const {

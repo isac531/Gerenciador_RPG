@@ -2,6 +2,7 @@
 
 #include <cstddef>
 #include <optional>
+#include <string>
 #include <vector>
 
 #include "../model/Usuario.h"
@@ -24,6 +25,9 @@ public:
 
     virtual bool existe(int id) const = 0;
     virtual std::optional<Usuario> buscar(int id) const = 0;
+
+    // Usuario com o login informado (logins sao unicos, RF01).
+    virtual std::optional<Usuario> buscarPorLogin(const std::string& login) const = 0;
 
     // Usuarios em ordem crescente de ID.
     virtual std::vector<Usuario> listarTodos() const = 0;

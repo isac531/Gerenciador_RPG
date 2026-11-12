@@ -21,6 +21,8 @@ private:
     // Retornam false apenas quando a entrada padrao foi encerrada.
     bool cadastrarUsuario();
     bool excluirUsuario();
+    bool fazerLogin();
+    bool gerarRelatorioAcessos();
     void listarUsuarios() const;
     void exibirQuantidadeEntidades() const;
 

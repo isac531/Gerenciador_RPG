@@ -5,12 +5,16 @@
 #include <optional>
 #include <vector>
 
+#include "../log/ILogger.h"
 #include "../model/Personagem.h"
 #include "../model/Usuario.h"
+#include "../repository/IAcessoRepositorio.h"
 #include "../repository/IPersonagemRepositorio.h"
 #include "../repository/IUsuarioRepositorio.h"
 #include "ControleCriarConta.h"
+#include "ControleLogin.h"
 #include "ControlePersonagem.h"
+#include "ControleRelatorioAcessos.h"
 #include "ControleUsuarios.h"
 
 // Fachada unica da camada de negocio (padroes Facade e Singleton, ADR-0004).
@@ -18,7 +22,7 @@
 // controle do caso de uso e coordena operacoes que envolvem mais de um
 // controle, como excluir um usuario junto com os personagens dele.
 //
-// Uso: FacadeSingletonController::getInstancia().inicializar(usuarios, personagens)
+// Uso: FacadeSingletonController::getInstancia().inicializar(usuarios, personagens, acessos)
 // uma vez, na raiz de composicao (main.cpp); depois, so getInstancia().
 class FacadeSingletonController {
 public:
@@ -28,14 +32,32 @@ public:
     FacadeSingletonController& operator=(const FacadeSingletonController&) = delete;
 
     // Liga os controles aos repositorios escolhidos. Chamar de novo troca
-    // os repositorios (usado pelos testes).
-    void inicializar(IUsuarioRepositorio& usuarios, IPersonagemRepositorio& personagens);
+    // os repositorios (usado pelos testes) e volta ao logger nulo.
+    // O relogio do registro de acessos pode ser trocado nos testes.
+    void inicializar(IUsuarioRepositorio& usuarios, IPersonagemRepositorio& personagens,
+                     IAcessoRepositorio& acessos,
+                     ControleLogin::Relogio relogio = ControleLogin::agora);
+
+    // Define onde a fachada registra os eventos (cadastros, logins,
+    // exclusoes, falhas de armazenamento). Chamar depois de inicializar();
+    // sem chamar, nada e registrado.
+    // O logger deve viver enquanto a fachada for usada.
+    void definirLogger(ILogger& logger);
 
     // ----- Usuarios (UC01, UC03, UC04) -----
     int criarConta(const Usuario& usuario);
     std::vector<Usuario> listarUsuarios() const;
     // Exclui o usuario e os personagens dele. Retorna false se o ID nao existir.
     bool excluirUsuario(int id);
+
+    // ----- Login (UC02) e registro de acessos (RF13) -----
+    // Registra a tentativa e retorna o usuario; lanca
+    // CredenciaisInvalidasException se login ou senha estiverem errados.
+    Usuario fazerLogin(const std::string& login, const std::string& senha);
+
+    // ----- Relatorio de acessos (UC16, RF14) -----
+    // Gera o relatorio no formato pedido (Template Method, ADR-0007).
+    RelatorioGerado gerarRelatorioAcessos(FormatoRelatorio formato) const;
 
     // ----- Personagens (UC07, UC12, UC13, UC14) -----
     int criarPersonagem(const Personagem& personagem);
@@ -57,8 +79,20 @@ private:
     ControleCriarConta& controleCriarConta() const;
     ControleUsuarios& controleUsuarios() const;
     ControlePersonagem& controlePersonagem() const;
+    ControleLogin& controleLogin() const;
+    ControleRelatorioAcessos& controleRelatorio() const;
+    ILogger& logger() const;
+
+    // Executa `operacao`; se ela lancar FalhaArmazenamentoException, registra
+    // o erro no log e relanca.
+    template <typename Operacao>
+    auto registrandoFalhaDeArmazenamento(const std::string& acao, Operacao operacao)
+        -> decltype(operacao());
 
     std::unique_ptr<ControleCriarConta> controleCriarConta_;
     std::unique_ptr<ControleUsuarios> controleUsuarios_;
     std::unique_ptr<ControlePersonagem> controlePersonagem_;
+    std::unique_ptr<ControleLogin> controleLogin_;
+    std::unique_ptr<ControleRelatorioAcessos> controleRelatorio_;
+    ILogger* logger_ = nullptr;
 };

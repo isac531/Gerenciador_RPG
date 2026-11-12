@@ -2,6 +2,7 @@
 
 #include "../src/business/control/FacadeSingletonController.h"
 #include "../src/business/exception/Excecoes.h"
+#include "../src/infra/RepositorioAcessoMemoria.h"
 #include "../src/infra/RepositorioMemoria.h"
 #include "../src/infra/RepositorioPersonagemMemoria.h"
 #include "TestRunner.h"
@@ -14,9 +15,10 @@ const std::string kSenhaValida = "Senha@123";
 struct CenarioFachada {
     RepositorioMemoria usuarios;
     RepositorioPersonagemMemoria personagens;
+    RepositorioAcessoMemoria acessos;
     FacadeSingletonController& fachada = FacadeSingletonController::getInstancia();
 
-    CenarioFachada() { fachada.inicializar(usuarios, personagens); }
+    CenarioFachada() { fachada.inicializar(usuarios, personagens, acessos); }
 
     int criarUsuario(const std::string& login) {
         return fachada.criarConta(Usuario(login, kSenhaValida, Papel::JOGADOR));

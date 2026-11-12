@@ -22,6 +22,15 @@ std::optional<Usuario> RepositorioMemoria::buscar(int id) const {
     return encontrado->second;
 }
 
+std::optional<Usuario> RepositorioMemoria::buscarPorLogin(const std::string& login) const {
+    for (const auto& entrada : usuarios_) {
+        if (entrada.second.getLogin() == login) {
+            return entrada.second;
+        }
+    }
+    return std::nullopt;
+}
+
 std::vector<Usuario> RepositorioMemoria::listarTodos() const {
     std::vector<Usuario> todos;
     todos.reserve(usuarios_.size());
