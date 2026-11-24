@@ -2,7 +2,7 @@
 
 #include "../business/repository/FabricaRepositorio.h"
 
-// Creator concreto: produz repositorios que guardam tudo na RAM.
+// Fabrica concreta (ConcreteFactory): produz repositorios que guardam tudo na RAM.
 class FabricaMemoria : public FabricaRepositorio {
 public:
     std::unique_ptr<IUsuarioRepositorio> criarRepositorioUsuarios() const override;
