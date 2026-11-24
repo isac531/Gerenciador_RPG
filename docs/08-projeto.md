@@ -14,7 +14,7 @@ src/
 │   ├── control/              ← FacadeSingletonController (fachada única) e os controles ControleCriarConta (UC01), ControleLogin (UC02), ControleUsuarios (UC03, UC04), ControlePersonagem (UC07, UC12–UC14), ControleRelatorioAcessos (UC16)
 │   ├── validation/           ← IRegraValidacao (login e senha) e IRegraFicha (ficha do personagem)
 │   ├── exception/            ← exceções de negócio: Login/Senha/FichaInvalida, CredenciaisInvalidas, IdInvalidoException, FalhaArmazenamentoException
-│   ├── repository/           ← interfaces IUsuarioRepositorio, IPersonagemRepositorio e IAcessoRepositorio (Repository), FabricaRepositorio (Creator do Factory Method), enum TipoArmazenamento
+│   ├── repository/           ← interfaces IUsuarioRepositorio, IPersonagemRepositorio e IAcessoRepositorio (Repository), FabricaRepositorio (AbstractFactory), enum TipoArmazenamento
 │   ├── report/               ← Template Method: GeradorRelatorioAcessos, RelatorioHtml, RelatorioPdf, EstatisticasAcesso, FormatoRelatorio
 │   └── log/                  ← ILogger (Target do Adapter) e LoggerNulo
 └── infra/                    ← repositórios em memória e em arquivo binário, ArquivoBinario, fábricas concretas (FabricaMemoria, FabricaArquivoBinario), EscolhaFabrica e LogCAdapter
@@ -30,9 +30,9 @@ test/                         ← um teste por cenário das regras (make test)
 
 A Sprint 4 separa por completo a comunicação entre a camada **business** e a de persistência (**infra**) para as três entidades persistidas (Usuário, Personagem e o novo **RegistroAcesso**), e acrescenta o Adapter e o Template Method. O diagrama foi dividido em dois para continuar legível. Os estereótipos indicam o papel de cada classe no padrão. O diagrama de **análise** com a caixa de repositórios, desenhado pelo Gustavo, está em `05-analise.md` §7.3.
 
-#### a) Separação business × infra: Repository e Factory Method
+#### a) Separação business × infra: Repository e Abstract Factory
 
-A business define as entidades, as interfaces de repositório (só com tipos do domínio) e o *Creator* abstrato `FabricaRepositorio`. A infra implementa tudo isso: um repositório em memória e um em arquivo binário por entidade, e um *Creator* concreto por mecanismo. Nenhuma seta sai da business para a infra. Versão em imagem: [`diagramas/DiagramaClasses-projeto-S4-business-infra.png`](diagramas/DiagramaClasses-projeto-S4-business-infra.png). Decisão em [ADR-0005](07-arquitetura/adr/0005-repository-e-factory-method.md).
+A business define as entidades, as interfaces de repositório (só com tipos do domínio) e a fábrica abstrata `FabricaRepositorio` (*AbstractFactory*). A infra implementa tudo isso: um repositório em memória e um em arquivo binário por entidade, e uma fábrica concreta (*ConcreteFactory*) por mecanismo. Nenhuma seta sai da business para a infra. Versão em imagem: [`diagramas/DiagramaClasses-projeto-S4-business-infra.png`](diagramas/DiagramaClasses-projeto-S4-business-infra.png). Decisão em [ADR-0005](07-arquitetura/adr/0005-repository-e-abstract-factory.md).
 
 ```mermaid
 classDiagram
@@ -107,7 +107,7 @@ classDiagram
             +quantidade() size_t
         }
         class FabricaRepositorio {
-            <<abstract · Factory Method: Creator>>
+            <<abstract · Abstract Factory>>
             +criarRepositorioUsuarios()* unique_ptr~IUsuarioRepositorio~
             +criarRepositorioPersonagens()* unique_ptr~IPersonagemRepositorio~
             +criarRepositorioAcessos()* unique_ptr~IAcessoRepositorio~
@@ -118,10 +118,10 @@ classDiagram
 
     namespace infra {
         class FabricaMemoria {
-            <<Factory Method: ConcreteCreator>>
+            <<Abstract Factory: ConcreteFactory>>
         }
         class FabricaArquivoBinario {
-            <<Factory Method: ConcreteCreator>>
+            <<Abstract Factory: ConcreteFactory>>
             -string caminhoUsuarios_
             -string caminhoPersonagens_
             -string caminhoAcessos_
@@ -402,7 +402,7 @@ classDiagram
             +quantidade() size_t
         }
         class FabricaRepositorio {
-            <<abstract, Creator>>
+            <<abstract, Abstract Factory>>
             +criarRepositorioUsuarios()* unique_ptr~IUsuarioRepositorio~
             +criarRepositorioPersonagens()* unique_ptr~IPersonagemRepositorio~
             +tipo()* TipoArmazenamento
@@ -482,8 +482,8 @@ classDiagram
     RepositorioPersonagemArquivoBinario ..> ArquivoBinario
     FabricaRepositorio <|-- FabricaMemoria
     FabricaRepositorio <|-- FabricaArquivoBinario
-    FabricaRepositorio ..> IUsuarioRepositorio : factory method
-    FabricaRepositorio ..> IPersonagemRepositorio : factory method
+    FabricaRepositorio ..> IUsuarioRepositorio : cria
+    FabricaRepositorio ..> IPersonagemRepositorio : cria
     FabricaMemoria ..> RepositorioMemoria : cria
     FabricaMemoria ..> RepositorioPersonagemMemoria : cria
     FabricaArquivoBinario ..> RepositorioArquivoBinario : cria
@@ -707,8 +707,8 @@ Nos três arquivos, a gravação é feita num arquivo temporário (`.tmp`) que d
 | Injeção de dependência | S2 | ControleCriarConta recebe IUsuarioRepositorio no construtor | Trocar o armazenamento sem alterar o controle (NF-MAN-01) | [ADR-0001](07-arquitetura/adr/0001-persistencia-substituivel.md) |
 | Singleton | S3 | FacadeSingletonController (construtor privado, `getInstancia()` com `static` local, cópia proibida) | Uma única fachada para toda a aplicação, inicializada uma vez em `main.cpp` | [ADR-0004](07-arquitetura/adr/0004-fachada-singleton.md) |
 | Facade | S3 | FacadeSingletonController (fachada); ControleCriarConta, ControleUsuarios, ControlePersonagem (subsistema); MenuPrincipal, MenuPersonagens (clientes) | A `ui` usa um único ponto de entrada; operações entre entidades (exclusão em cascata, contagem de entidades) ficam no negócio | [ADR-0004](07-arquitetura/adr/0004-fachada-singleton.md) |
-| Repository | S4 | Interfaces IUsuarioRepositorio, IPersonagemRepositorio e IAcessoRepositorio na business (só tipos do domínio); implementações em memória e em arquivo binário na infra | A business trata os dados como uma coleção em memória, sem saber onde ficam; regras de negócio ficam nos controles; os testes usam a versão em memória | [ADR-0005](07-arquitetura/adr/0005-repository-e-factory-method.md) |
-| Factory Method | S4 | FabricaRepositorio (Creator abstrato, na business; declara os factory methods `criarRepositorioUsuarios()`, `criarRepositorioPersonagens()` e `criarRepositorioAcessos()`), FabricaMemoria e FabricaArquivoBinario (Creators concretos, na infra, decidem a classe instanciada), IUsuarioRepositorio, IPersonagemRepositorio e IAcessoRepositorio (produtos), `escolherFabrica()` (seleciona o Creator a partir de TipoArmazenamento) | Escolher o tipo de repositório (RF05) sem `if` espalhado e sem que a business conheça classes da infra; novo mecanismo = nova subclasse (NF-MAN-01) | [ADR-0005](07-arquitetura/adr/0005-repository-e-factory-method.md) |
+| Repository | S4 | Interfaces IUsuarioRepositorio, IPersonagemRepositorio e IAcessoRepositorio na business (só tipos do domínio); implementações em memória e em arquivo binário na infra | A business trata os dados como uma coleção em memória, sem saber onde ficam; regras de negócio ficam nos controles; os testes usam a versão em memória | [ADR-0005](07-arquitetura/adr/0005-repository-e-abstract-factory.md) |
+| Abstract Factory | S4 | FabricaRepositorio (fábrica abstrata, na business; declara as operações de criação `criarRepositorioUsuarios()`, `criarRepositorioPersonagens()` e `criarRepositorioAcessos()`), FabricaMemoria e FabricaArquivoBinario (fábricas concretas, na infra, criam a família completa de um mecanismo), IUsuarioRepositorio, IPersonagemRepositorio e IAcessoRepositorio (produtos), `escolherFabrica()` (seleciona a fábrica concreta a partir de TipoArmazenamento) | Escolher o tipo de repositório (RF05) sem `if` espalhado e sem que a business conheça classes da infra; novo mecanismo = nova subclasse (NF-MAN-01) | [ADR-0005](07-arquitetura/adr/0005-repository-e-abstract-factory.md) |
 | Adapter | S4 | ILogger (Target, na business), LogCAdapter (Adapter, na infra), biblioteca rxi/log.c em `infra/externo/logc` (Adaptee); LoggerNulo (Null Object) quando não há log | Registrar eventos em `rpg.log` com uma biblioteca C pronta sem que a business dependa dela; trocar de biblioteca = novo adaptador | [ADR-0006](07-arquitetura/adr/0006-adapter-log.md) |
 | Template Method | S4 | GeradorRelatorioAcessos (classe abstrata; `gerar()` é o método-template, não virtual), RelatorioHtml e RelatorioPdf (subclasses concretas), `textoRodape()` (gancho) | Gerar o relatório de acessos em HTML e PDF com as mesmas seções, na mesma ordem; formato novo = nova subclasse | [ADR-0007](07-arquitetura/adr/0007-relatorios-template-method.md) |
 | Null Object | S4 | LoggerNulo (implementa ILogger sem fazer nada) | A fachada funciona sem logger definido (testes) sem espalhar `if (logger != nullptr)` | [ADR-0006](07-arquitetura/adr/0006-adapter-log.md) |
