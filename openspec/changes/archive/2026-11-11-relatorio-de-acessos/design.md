@@ -6,9 +6,9 @@
 
 `ControleLogin` busca o usuário por login (`IUsuarioRepositorio::buscarPorLogin`, novo), confere a senha, grava o registro e só então lança `CredenciaisInvalidasException` se a tentativa foi recusada. O relógio é injetado para os testes.
 
-## Persistência (Repository + Factory Method)
+## Persistência (Repository + Abstract Factory)
 
-Ver [ADR-0005](../../../docs/07-arquitetura/adr/0005-repository-e-factory-method.md). `FabricaRepositorio` ganha `criarRepositorioAcessos()`; `FabricaMemoria` cria `RepositorioAcessoMemoria` e `FabricaArquivoBinario` cria `RepositorioAcessoArquivoBinario` (`acessos.dat`).
+Ver [ADR-0005](../../../docs/07-arquitetura/adr/0005-repository-e-abstract-factory.md). `FabricaRepositorio` ganha `criarRepositorioAcessos()`; `FabricaMemoria` cria `RepositorioAcessoMemoria` e `FabricaArquivoBinario` cria `RepositorioAcessoArquivoBinario` (`acessos.dat`).
 
 Formato de `acessos.dat` (little-endian): `int32` próximo ID, `uint32` quantidade; para cada registro, `int32` ID, `uint32` tamanho + bytes do login, `int32` ID do usuário, `int64` data e hora, `uint8` resultado (0 ou 1).
 

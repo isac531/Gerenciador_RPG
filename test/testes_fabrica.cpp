@@ -29,7 +29,7 @@ Ficha fichaExemplo() {
 
 }  // namespace
 
-// ---------- Factory Method: escolha da fabrica ----------
+// ---------- Abstract Factory: escolha da fabrica ----------
 
 TESTE(escolher_fabrica_deve_devolver_a_fabrica_do_tipo_pedido) {
     VERIFICAR(escolherFabrica(TipoArmazenamento::MEMORIA)->tipo() == TipoArmazenamento::MEMORIA);
@@ -37,7 +37,7 @@ TESTE(escolher_fabrica_deve_devolver_a_fabrica_do_tipo_pedido) {
               TipoArmazenamento::ARQUIVO_BINARIO);
 }
 
-// ---------- Factory Method: fabrica em memoria ----------
+// ---------- Abstract Factory: fabrica em memoria ----------
 
 TESTE(fabrica_memoria_deve_criar_repositorios_vazios) {
     FabricaMemoria fabrica;
@@ -61,7 +61,7 @@ TESTE(fabrica_memoria_deve_criar_repositorios_independentes) {
     VERIFICAR(segundo->quantidade() == 0);
 }
 
-// ---------- Factory Method: fabrica em arquivo binario ----------
+// ---------- Abstract Factory: fabrica em arquivo binario ----------
 
 TESTE(fabrica_arquivo_deve_criar_repositorios_que_persistem) {
     ArquivoTemporario arquivoUsuarios("fabrica_usuarios.dat");
@@ -94,7 +94,7 @@ TESTE(fabrica_arquivo_deve_lancar_falha_com_arquivo_corrompido) {
     VERIFICAR_LANCA(fabrica.criarRepositorioUsuarios(), FalhaArmazenamentoException);
 }
 
-// ---------- Factory Method: o cliente usa so a classe abstrata ----------
+// ---------- Abstract Factory: o cliente usa so a classe abstrata ----------
 
 TESTE(criar_repositorios_deve_funcionar_por_ponteiro_para_a_classe_abstrata) {
     std::unique_ptr<FabricaRepositorio> fabrica = escolherFabrica(TipoArmazenamento::MEMORIA);
