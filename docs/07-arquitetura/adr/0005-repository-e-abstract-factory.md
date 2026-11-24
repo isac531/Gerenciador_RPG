@@ -1,4 +1,4 @@
-# ADR-0005: Repository por entidade e Factory Method para escolher o armazenamento
+# ADR-0005: Repository por entidade e Abstract Factory para escolher o armazenamento
 
 - **Status:** aceito
 - **Data:** 2026-11-11
@@ -20,7 +20,7 @@ Até a Sprint 3, cada entidade tinha uma interface de repositório (`IUsuarioRep
 
 Os controles recebem as interfaces pelo construtor e não conhecem a `infra`. Regras de negócio (login repetido, dono existente, ficha válida) ficam nos controles, nunca no repositório. A versão em memória é também o *test double* dos testes de unidade.
 
-**Factory Method (GoF).** `FabricaRepositorio` (classe abstrata em `business/repository`, papel de *Creator*) declara um *factory method* por entidade (`criarRepositorioUsuarios()`, `criarRepositorioPersonagens()`, `criarRepositorioAcessos()`) e a operação `criarRepositorios()`, que monta o conjunto completo sem conhecer as classes concretas. `FabricaMemoria` e `FabricaArquivoBinario` (na `infra`, *Creators* concretos) decidem qual classe instanciar. `escolherFabrica(tipo)` (`infra/EscolhaFabrica`) é o único lugar com `if` sobre `TipoArmazenamento`; o `main.cpp` chama `escolherFabrica(tipo)->criarRepositorios()`.
+**Abstract Factory (GoF).** O que se cria é uma família de repositórios relacionados (usuários, personagens e acessos) de um mesmo mecanismo de armazenamento. `FabricaRepositorio` (classe abstrata em `business/repository`, papel de *AbstractFactory*) declara uma operação de criação por produto da família (`criarRepositorioUsuarios()`, `criarRepositorioPersonagens()`, `criarRepositorioAcessos()`) e a operação `criarRepositorios()`, que monta o conjunto completo sem conhecer as classes concretas. Os produtos abstratos são `IUsuarioRepositorio`, `IPersonagemRepositorio` e `IAcessoRepositorio`. `FabricaMemoria` e `FabricaArquivoBinario` (na `infra`, *ConcreteFactory*) criam, cada uma, a família completa do seu mecanismo, então repositórios de mecanismos diferentes nunca se misturam. Cada operação `criar...()` é sobrescrita pela subclasse, como num *factory method*, mas o padrão que a estrutura realiza é a Abstract Factory, porque ela produz uma família de produtos. `escolherFabrica(tipo)` (`infra/EscolhaFabrica`) é o único lugar com `if` sobre `TipoArmazenamento`; o `main.cpp` (cliente) chama `escolherFabrica(tipo)->criarRepositorios()`.
 
 As funções livres antigas (`infra/FabricaRepositorio.h/.cpp`) foram removidas: depois da fábrica nova, nada mais as chamava.
 
@@ -29,11 +29,11 @@ As funções livres antigas (`infra/FabricaRepositorio.h/.cpp`) foram removidas:
 | Alternativa | Por que não |
 |---|---|
 | Manter as funções livres com `if` por entidade | Cada entidade nova repete o `if`; um novo mecanismo (ex.: SQLite) exige alterar todas as funções (viola OCP) |
-| Abstract Factory com uma família de produtos por mecanismo | É o que a fábrica já faz na prática (um *Creator* por mecanismo, um produto por entidade); o nome Factory Method foi mantido porque cada operação `criar...()` é sobrescrita pelas subclasses, e o enunciado aceita os dois |
+| Factory Method isolado (um *Creator* por entidade, sem uma fábrica que agrupe a família) | O Factory Method trata de um produto por vez; nada garantiria que usuários, personagens e acessos viessem do mesmo mecanismo. A fábrica que cria a família inteira é uma Abstract Factory |
 | Repositório genérico `Repositorio<T>` | O material da disciplina o aponta como anti-pattern: esconde a intenção do negócio e força filtros em memória nos controles |
 | Um único repositório "Deus" para todas as entidades | Fere o ISP e dificulta os testes |
 
 ## Consequências
 
-- Positivas: novo mecanismo de armazenamento = nova subclasse de `FabricaRepositorio`, sem tocar em controles, fachada ou testes de regra (NF-MAN-01). Nova entidade = um *factory method* a mais e uma implementação em cada fábrica concreta. Os testes de controle continuam usando os repositórios em memória.
+- Positivas: novo mecanismo de armazenamento = nova subclasse de `FabricaRepositorio`, sem tocar em controles, fachada ou testes de regra (NF-MAN-01). Nova entidade = uma operação de criação a mais na fábrica abstrata e uma implementação em cada fábrica concreta. Os testes de controle continuam usando os repositórios em memória.
 - Negativas: cada entidade nova obriga a alterar todas as fábricas concretas (custo conhecido do padrão). Os repositórios em arquivo continuam regravando o arquivo inteiro a cada alteração, aceitável para o volume do projeto (NF-DES-01).

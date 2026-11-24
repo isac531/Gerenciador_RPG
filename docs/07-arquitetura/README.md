@@ -11,7 +11,7 @@
 | [ADR-0002](adr/0002-login-e-papel-no-usuario.md) | Renomear `nome` para `login` e acrescentar o papel ao usuário | RF01, RF02, RF04 |
 | [ADR-0003](adr/0003-id-automatico.md) | Gerar o ID do usuário no repositório | RF01, NF-CON-02 |
 | [ADR-0004](adr/0004-fachada-singleton.md) | Fachada única com Singleton para os controles | RF08–RF12, NF-MAN-01 |
-| [ADR-0005](adr/0005-repository-e-factory-method.md) | Repository por entidade e Factory Method para escolher o armazenamento | RF05, NF-MAN-01 |
+| [ADR-0005](adr/0005-repository-e-abstract-factory.md) | Repository por entidade e Abstract Factory para escolher o armazenamento | RF05, NF-MAN-01 |
 | [ADR-0006](adr/0006-adapter-log.md) | Adapter para a biblioteca de log rxi/log.c | RF07, RF13, NF-SEG-01, NF-MAN-01 |
 | [ADR-0007](adr/0007-relatorios-template-method.md) | Template Method para os relatórios de acesso em HTML e PDF | RF13, RF14, NF-MAN-01 |
 
@@ -30,7 +30,7 @@ flowchart TB
         relatorios["report: GeradorRelatorioAcessos<br/>(Template Method) → RelatorioHtml, RelatorioPdf"]
         regras["validation: regras de login, senha e ficha"]
         modelo["model: Usuario, Papel, Personagem, Ficha, RegistroAcesso"]
-        contratos["repository: IUsuarioRepositorio, IPersonagemRepositorio,<br/>IAcessoRepositorio, FabricaRepositorio (Factory Method)"]
+        contratos["repository: IUsuarioRepositorio, IPersonagemRepositorio,<br/>IAcessoRepositorio, FabricaRepositorio (Abstract Factory)"]
         log["log: ILogger, LoggerNulo"]
         excecoes["exception"]
     end
