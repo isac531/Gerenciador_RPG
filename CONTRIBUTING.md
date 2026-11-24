@@ -247,7 +247,7 @@ Não é refactoring massivo — é renomear uma variável confusa, extrair um bl
 - `ui` → `business` ← `infra` (ver [`docs/08-projeto.md`](docs/08-projeto.md)). A `business` não inclui nada de `ui` nem de `infra`.
 - A `ui` fala **só** com a `FacadeSingletonController` ([ADR-0004](docs/07-arquitetura/adr/0004-fachada-singleton.md)). Caso de uso novo = método novo na fachada que delega a um controle.
 - Os controles recebem as interfaces de repositório no construtor; só `main.cpp` conhece as classes concretas de `infra`.
-- Entidade persistida nova = interface `I<Entidade>Repositorio` em `business/repository` + *factory method* em `FabricaRepositorio` + implementação em memória e em arquivo na `infra`, criadas pelas fábricas concretas ([ADR-0005](docs/07-arquitetura/adr/0005-repository-e-factory-method.md)). Regra de negócio nunca vai dentro do repositório.
+- Entidade persistida nova = interface `I<Entidade>Repositorio` em `business/repository` + operação de criação em `FabricaRepositorio` (Abstract Factory) + implementação em memória e em arquivo na `infra`, criadas pelas fábricas concretas ([ADR-0005](docs/07-arquitetura/adr/0005-repository-e-abstract-factory.md)). Regra de negócio nunca vai dentro do repositório.
 - Biblioteca de terceiros: copiada sem alterações em `src/infra/externo/<nome>/` com a licença, e usada só por um adaptador na `infra` que implementa uma interface da `business` ([ADR-0006](docs/07-arquitetura/adr/0006-adapter-log.md)).
 - Log: use o `ILogger` da fachada; **nunca** registre a senha (NF-SEG-01).
 - IDs de entidades são gerados pelo repositório e nunca reaproveitados ([ADR-0003](docs/07-arquitetura/adr/0003-id-automatico.md)).

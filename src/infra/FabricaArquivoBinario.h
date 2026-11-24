@@ -4,7 +4,7 @@
 
 #include "../business/repository/FabricaRepositorio.h"
 
-// Creator concreto: produz repositorios que gravam em arquivos binarios.
+// Fabrica concreta (ConcreteFactory): produz repositorios que gravam em arquivos binarios.
 // Cada entidade tem o seu arquivo; os caminhos sao definidos aqui, e nao
 // espalhados pelo restante do sistema.
 class FabricaArquivoBinario : public FabricaRepositorio {

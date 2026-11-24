@@ -2,7 +2,7 @@
 
 ## Por quê
 
-A Sprint 4 pede relatórios com estatísticas de acesso dos usuários, gerados na camada business com o padrão Template Method em mais de um formato (por exemplo, HTML e PDF). Hoje o sistema não registra acessos, porque o login (RF07, UC02) ainda não estava implementado. A mesma sprint pede Repository para todas as entidades, Factory Method para escolher o repositório e um cenário de Adapter (sugestão: biblioteca de log).
+A Sprint 4 pede relatórios com estatísticas de acesso dos usuários, gerados na camada business com o padrão Template Method em mais de um formato (por exemplo, HTML e PDF). Hoje o sistema não registra acessos, porque o login (RF07, UC02) ainda não estava implementado. A mesma sprint pede Repository para todas as entidades, Factory Method (ou Abstract Factory) para escolher o repositório e um cenário de Adapter (sugestão: biblioteca de log).
 
 ## O que muda
 
@@ -12,7 +12,7 @@ A Sprint 4 pede relatórios com estatísticas de acesso dos usuários, gerados n
 - **MODIFIED** NF-POR-01: passa a aceitar bibliotecas de terceiros copiadas em código-fonte no repositório (a biblioteca de log do Adapter), sem nada a instalar.
 - Implementação do login (RF07, UC02) com a mensagem única "Login ou senha invalidos." (NF-SEG-02), porque sem login não há acessos para contar.
 - Casos de uso: novo UC16 Gerar relatório de acessos.
-- Código: entidade `RegistroAcesso` com `IAcessoRepositorio` e versões em memória e em arquivo; novo *factory method* `criarRepositorioAcessos()`; `ControleLogin`; `ControleRelatorioAcessos`; Template Method `GeradorRelatorioAcessos` com `RelatorioHtml` e `RelatorioPdf`; Adapter `LogCAdapter` para a biblioteca rxi/log.c.
+- Código: entidade `RegistroAcesso` com `IAcessoRepositorio` e versões em memória e em arquivo; nova operação de criação `criarRepositorioAcessos()`; `ControleLogin`; `ControleRelatorioAcessos`; Template Method `GeradorRelatorioAcessos` com `RelatorioHtml` e `RelatorioPdf`; Adapter `LogCAdapter` para a biblioteca rxi/log.c.
 
 ## Fora do escopo
 
@@ -24,4 +24,4 @@ A Sprint 4 pede relatórios com estatísticas de acesso dos usuários, gerados n
 ## Impacto
 
 - Specs: nova capacidade `acessos`; `usuarios` (RF05) e `rnf/portabilidade` (NF-POR-01) modificadas.
-- Documentos: casos de uso (UC16), `07-arquitetura/`, `08-projeto.md` (diagrama da S4.1 e tabela de padrões), [ADR-0005](../../../docs/07-arquitetura/adr/0005-repository-e-factory-method.md), [ADR-0006](../../../docs/07-arquitetura/adr/0006-adapter-log.md), [ADR-0007](../../../docs/07-arquitetura/adr/0007-relatorios-template-method.md).
+- Documentos: casos de uso (UC16), `07-arquitetura/`, `08-projeto.md` (diagrama da S4.1 e tabela de padrões), [ADR-0005](../../../docs/07-arquitetura/adr/0005-repository-e-abstract-factory.md), [ADR-0006](../../../docs/07-arquitetura/adr/0006-adapter-log.md), [ADR-0007](../../../docs/07-arquitetura/adr/0007-relatorios-template-method.md).

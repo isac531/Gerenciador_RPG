@@ -6,7 +6,7 @@
 
 ## Contexto
 
-A Sprint 4 pede que a camada business gere, com o padrão **Template Method**, relatórios de estatísticas de acesso dos usuários em mais de um formato (por exemplo, HTML e PDF). Os acessos passaram a ser registrados pelo login (RF13, [ADR-0005](0005-repository-e-factory-method.md)).
+A Sprint 4 pede que a camada business gere, com o padrão **Template Method**, relatórios de estatísticas de acesso dos usuários em mais de um formato (por exemplo, HTML e PDF). Os acessos passaram a ser registrados pelo login (RF13, [ADR-0005](0005-repository-e-abstract-factory.md)).
 
 Os formatos diferem só na forma de escrever cada parte (tag HTML, operador de texto do PDF). O conteúdo e a ordem das seções (título, data, resumo, acessos por usuário, rodapé) têm de ser iguais em todos. Se cada formato montasse o relatório inteiro, a ordem e o cálculo das seções seriam duplicados e poderiam divergir.
 

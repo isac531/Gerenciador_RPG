@@ -1,6 +1,6 @@
 # Tarefas: relatório de acessos
 
-## 1. Repository e Factory Method
+## 1. Repository e Abstract Factory
 - [x] 1.1 `refactor(repository): remover fabrica antiga e registrar ADR-0005`
 - [x] 1.2 `feat(infra): adicionar registro de acesso e seus repositorios`
 
