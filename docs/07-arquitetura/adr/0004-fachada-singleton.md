@@ -12,7 +12,7 @@ Com o CRUD de personagens, a camada de negócio passou a ter três controles (`C
 
 Criar `FacadeSingletonController` em `business/control`:
 
-- **Facade:** é o único ponto de entrada da `ui` na camada de negócio. Repassa cada pedido ao controle do caso de uso e coordena as operações entre controles (`excluirUsuario` exclui primeiro os personagens do usuário). `obterQuantidadeEntidades()` soma usuários e personagens; `obterQuantidadeUsuarios()` e `obterQuantidadePersonagens()` dão o detalhe.
+- **Facade:** é o único ponto de entrada da `ui` na camada de negócio. Repassa cada pedido ao controle do caso de uso (a partir da Sprint 5, por meio de um comando, [ADR-0008](0008-fachada-command.md)) e coordena as operações entre controles (`excluirUsuario` exclui primeiro os personagens do usuário). `obterQuantidadeEntidades()` soma usuários e personagens; `obterQuantidadeUsuarios()` e `obterQuantidadePersonagens()` dão o detalhe.
 - **Singleton:** construtor privado, cópia proibida e `getInstancia()` com variável `static` local (inicialização thread-safe desde o C++11). Os repositórios continuam injetados: `main.cpp` chama `inicializar(usuarios, personagens)` uma vez, e a fachada cria os controles com eles (o Singleton não esconde as dependências concretas, preservando o [ADR-0001](0001-persistencia-substituivel.md)).
 - `MenuPrincipal` e `MenuPersonagens` recebem a fachada por referência no construtor, em vez de chamar `getInstancia()` em todo lugar.
 
@@ -29,4 +29,4 @@ No diagrama de classes de análise a classe aparece como `FachadaControladores`;
 ## Consequências
 
 - Positivas: a `ui` depende só da fachada; regras entre entidades ficam no negócio; testes reinicializam a fachada com repositórios novos em memória.
-- Negativas: a fachada cresce a cada caso de uso novo; na Sprint 5 ela passa a usar Command, o que reduz esse acoplamento. Usar a fachada antes de `inicializar()` lança `std::logic_error` (erro de programação).
+- Negativas: a fachada cresce a cada caso de uso novo; na Sprint 5 ela passou a executar cada caso de uso como um comando ([ADR-0008](0008-fachada-command.md)), o que reduz esse acoplamento. Usar a fachada antes de `inicializar()` lança `std::logic_error` (erro de programação).

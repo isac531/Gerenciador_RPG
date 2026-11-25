@@ -103,7 +103,7 @@ Um hotfix parte de `main`, é corrigido, e depois é integrado em `develop` tamb
 | Escopo | Quando usar |
 |---|---|
 | `usuarios`, `personagem` | Mudança que atravessa camadas de uma entidade |
-| `model`, `control`, `validation`, `exception`, `repository` | Pastas de `src/business/` |
+| `model`, `control`, `command`, `validation`, `exception`, `repository` | Pastas de `src/business/` |
 | `infra`, `ui` | Pastas `src/infra/` e `src/ui/` |
 | `test` | Só testes |
 | `specs`, `casos-de-uso`, `projeto`, `adr`, `diagramas` | Documentação |
@@ -245,11 +245,11 @@ Não é refactoring massivo — é renomear uma variável confusa, extrair um bl
 ### 5.2 Camadas e dependências
 
 - `ui` → `business` ← `infra` (ver [`docs/08-projeto.md`](docs/08-projeto.md)). A `business` não inclui nada de `ui` nem de `infra`.
-- A `ui` fala **só** com a `FacadeSingletonController` ([ADR-0004](docs/07-arquitetura/adr/0004-fachada-singleton.md)). Caso de uso novo = método novo na fachada que delega a um controle.
+- A `ui` fala **só** com a `FacadeSingletonController` ([ADR-0004](docs/07-arquitetura/adr/0004-fachada-singleton.md)). Caso de uso novo = um comando novo em `business/command` (que chama o controle e registra o evento) + um método novo na fachada que monta o comando e o entrega ao `InvocadorComandos` ([ADR-0008](docs/07-arquitetura/adr/0008-fachada-command.md)). Parâmetros e resultado ficam dentro do comando; um comando vive só durante uma chamada da fachada.
 - Os controles recebem as interfaces de repositório no construtor; só `main.cpp` conhece as classes concretas de `infra`.
 - Entidade persistida nova = interface `I<Entidade>Repositorio` em `business/repository` + operação de criação em `FabricaRepositorio` (Abstract Factory) + implementação em memória e em arquivo na `infra`, criadas pelas fábricas concretas ([ADR-0005](docs/07-arquitetura/adr/0005-repository-e-abstract-factory.md)). Regra de negócio nunca vai dentro do repositório.
 - Biblioteca de terceiros: copiada sem alterações em `src/infra/externo/<nome>/` com a licença, e usada só por um adaptador na `infra` que implementa uma interface da `business` ([ADR-0006](docs/07-arquitetura/adr/0006-adapter-log.md)).
-- Log: use o `ILogger` da fachada; **nunca** registre a senha (NF-SEG-01).
+- Log: use o `ILogger` que a fachada entrega ao comando; **nunca** registre a senha (NF-SEG-01). A falha de armazenamento é registrada pelo `InvocadorComandos`; o comando não precisa tratá-la.
 - IDs de entidades são gerados pelo repositório e nunca reaproveitados ([ADR-0003](docs/07-arquitetura/adr/0003-id-automatico.md)).
 - Regra de validação nova = nova classe que implementa `IRegraValidacao` ou `IRegraFicha`, registrada no construtor do controle (Strategy).
 - Erros de dado do usuário viram exceções específicas, tratadas na `ui` com mensagem que diz a regra violada; erros de E/S viram `FalhaArmazenamentoException`.

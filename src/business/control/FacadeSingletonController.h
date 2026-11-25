@@ -5,6 +5,8 @@
 #include <optional>
 #include <vector>
 
+#include "../command/ContarEntidadesComando.h"
+#include "../command/InvocadorComandos.h"
 #include "../log/ILogger.h"
 #include "../model/Personagem.h"
 #include "../model/Usuario.h"
@@ -18,9 +20,11 @@
 #include "ControleUsuarios.h"
 
 // Fachada unica da camada de negocio (padroes Facade e Singleton, ADR-0004).
-// A interface conversa so com esta classe; ela repassa cada pedido ao
-// controle do caso de uso e coordena operacoes que envolvem mais de um
-// controle, como excluir um usuario junto com os personagens dele.
+// A interface conversa so com esta classe. Cada metodo publico monta o
+// comando do caso de uso (padrao Command, ADR-0008) e o entrega ao
+// InvocadorComandos; os comandos chamam os controles e coordenam operacoes
+// que envolvem mais de um deles, como excluir um usuario junto com os
+// personagens dele.
 //
 // Uso: FacadeSingletonController::getInstancia().inicializar(usuarios, personagens, acessos)
 // uma vez, na raiz de composicao (main.cpp); depois, so getInstancia().
@@ -83,16 +87,14 @@ private:
     ControleRelatorioAcessos& controleRelatorio() const;
     ILogger& logger() const;
 
-    // Executa `operacao`; se ela lancar FalhaArmazenamentoException, registra
-    // o erro no log e relanca.
-    template <typename Operacao>
-    auto registrandoFalhaDeArmazenamento(const std::string& acao, Operacao operacao)
-        -> decltype(operacao());
+    // Executa o comando de contagem; as tres consultas de quantidade usam o mesmo.
+    QuantidadeEntidades contarEntidades() const;
 
     std::unique_ptr<ControleCriarConta> controleCriarConta_;
     std::unique_ptr<ControleUsuarios> controleUsuarios_;
     std::unique_ptr<ControlePersonagem> controlePersonagem_;
     std::unique_ptr<ControleLogin> controleLogin_;
     std::unique_ptr<ControleRelatorioAcessos> controleRelatorio_;
+    InvocadorComandos invocador_;
     ILogger* logger_ = nullptr;
 };
