@@ -1,6 +1,6 @@
 # Arquitetura
 
-> Seção 9 do modelo. Arquitetura lógica e física do sistema até a Sprint 4 e como cada requisito não funcional é atendido.
+> Seção 9 do modelo. Arquitetura lógica e física do sistema até a Sprint 5 e como cada requisito não funcional é atendido.
 > Decisões importantes ficam registradas como ADRs em [`adr/`](adr/).
 
 ## Decisões registradas
@@ -14,10 +14,11 @@
 | [ADR-0005](adr/0005-repository-e-abstract-factory.md) | Repository por entidade e Abstract Factory para escolher o armazenamento | RF05, NF-MAN-01 |
 | [ADR-0006](adr/0006-adapter-log.md) | Adapter para a biblioteca de log rxi/log.c | RF07, RF13, NF-SEG-01, NF-MAN-01 |
 | [ADR-0007](adr/0007-relatorios-template-method.md) | Template Method para os relatórios de acesso em HTML e PDF | RF13, RF14, NF-MAN-01 |
+| [ADR-0008](adr/0008-fachada-command.md) | Fachada que executa os casos de uso como comandos (Command) | RF01, RF04, RF06–RF14, NF-MAN-01, NF-SEG-01 |
 
-## Arquitetura lógica (Sprint 4)
+## Arquitetura lógica (Sprint 5)
 
-Aplicação de console monolítica em C++17, em três camadas. A `ui` fala só com a fachada. A `business` define as interfaces (repositórios, fábrica abstrata e `ILogger`), e a `infra` as implementa, inclusive o adaptador da biblioteca de log de terceiros. Só `main.cpp` (raiz de composição) conhece as três camadas.
+Aplicação de console monolítica em C++17, em três camadas. A `ui` fala só com a fachada, e a fachada executa cada caso de uso como um comando (Command, [ADR-0008](adr/0008-fachada-command.md)). A `business` define as interfaces (repositórios, fábrica abstrata e `ILogger`), e a `infra` as implementa, inclusive o adaptador da biblioteca de log de terceiros. Só `main.cpp` (raiz de composição) conhece as três camadas.
 
 ```mermaid
 flowchart TB
@@ -26,6 +27,7 @@ flowchart TB
     end
     subgraph business["business"]
         fachada["FacadeSingletonController<br/>(Facade + Singleton)"]
+        comandos["command: IComando, ComandoComResultado, InvocadorComandos<br/>(Command) → um comando por caso de uso"]
         controles["ControleCriarConta · ControleLogin · ControleUsuarios<br/>ControlePersonagem · ControleRelatorioAcessos"]
         relatorios["report: GeradorRelatorioAcessos<br/>(Template Method) → RelatorioHtml, RelatorioPdf"]
         regras["validation: regras de login, senha e ficha"]
@@ -43,8 +45,11 @@ flowchart TB
     main["main.cpp<br/>raiz de composição"]
 
     menu --> fachada
+    fachada --> comandos
     fachada --> controles
     fachada --> log
+    comandos --> controles
+    comandos --> log
     controles --> regras
     controles --> modelo
     controles --> contratos
@@ -88,15 +93,15 @@ flowchart LR
 
 | RNF | Como é atendido | Onde |
 |---|---|---|
-| NF-SEG-01 Senha nunca exibida | A listagem não imprime a senha, as mensagens de erro de senha não a repetem e o log nunca a registra | `MenuPrincipal::listarUsuarios`, `Excecoes.h`, `FacadeSingletonController`; testes `mensagens_de_erro_nao_devem_conter_a_senha` e `fachada_deve_registrar_login_aceito_e_recusado_sem_a_senha` |
+| NF-SEG-01 Senha nunca exibida | A listagem não imprime a senha, as mensagens de erro de senha não a repetem e o log nunca a registra | `MenuPrincipal::listarUsuarios`, `Excecoes.h`, comandos de `business/command` (`CriarContaComando`, `FazerLoginComando`); testes `mensagens_de_erro_nao_devem_conter_a_senha` e `fachada_deve_registrar_login_aceito_e_recusado_sem_a_senha` |
 | NF-SEG-02 Falha de login sem pista | Login inexistente e senha errada lançam a mesma `CredenciaisInvalidasException` ("Login ou senha invalidos.") | `ControleLogin`; testes `deve_recusar_senha_incorreta_sem_indicar_o_campo` e `deve_recusar_login_inexistente_com_a_mesma_mensagem` |
 | NF-CON-01 Falha de armazenamento tratada | Toda falha de E/S vira `FalhaArmazenamentoException`, tratada no menu sem encerrar o programa; a alteração é desfeita na memória | `ArquivoBinario`, repositórios em arquivo, menus |
 | NF-CON-02 Arquivo corrompido detectado | A carga confere tamanhos, IDs, papel e dados extras e lança `FalhaArmazenamentoException`; `main.cpp` passa a usar a memória | `ArquivoBinario::carregar`, `main.cpp` |
 | NF-CON-03 Durabilidade dos cadastros | Cada alteração regrava o arquivo inteiro num `.tmp` que depois substitui o original | `ArquivoBinario::gravar` |
 | NF-DES-01 Tempo de listagem e carga | Coleções em `std::map` carregadas uma vez ao iniciar; listagem sem acesso a disco | repositórios |
-| NF-MAN-01 Armazenamento substituível | Controles dependem só das interfaces de repositório; os repositórios de um mecanismo são criados juntos por uma subclasse de `FabricaRepositorio`; a `ui` depende só da fachada | ADR-0001, ADR-0004, ADR-0005 |
+| NF-MAN-01 Armazenamento substituível | Controles dependem só das interfaces de repositório; os repositórios de um mecanismo são criados juntos por uma subclasse de `FabricaRepositorio`; a `ui` depende só da fachada, que executa cada caso de uso como um comando | ADR-0001, ADR-0004, ADR-0005, ADR-0008 |
 | NF-MAN-02 Nova regra sem alterar as existentes | Strategy: `IRegraValidacao` (usuário) e `IRegraFicha` (personagem), uma classe por regra | `business/validation` |
-| NF-MAN-03 Regras cobertas por testes | 73 testes automatizados (`make test`) | `test/` |
+| NF-MAN-03 Regras cobertas por testes | 81 testes automatizados (`make test`) | `test/` |
 | NF-USA-01 Mensagem específica para cada recusa | Uma exceção por regra, com a mensagem da regra violada | `Excecoes.h` |
 | NF-USA-02 Cadastro rápido de aprender | Menus numerados e pedidos campo a campo | `ui/` |
 | NF-USA-03 Entrada inválida não encerra | Leitura linha a linha com conversão verificada (`console::lerInteiro`) | `ui/Console` |
