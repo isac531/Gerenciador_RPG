@@ -1,0 +1,34 @@
+name: Validar commits
+
+# Confere se os commits do PR seguem o CONTRIBUTING §2: Conventional Commits
+# com um dos tipos permitidos e primeira linha com no maximo 72 caracteres.
+# Commits de merge sao ignorados.
+on:
+  pull_request:
+
+jobs:
+  validar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Conferir a primeira linha de cada commit
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          padrao='^(feat|fix|refactor|test|docs|chore|style|perf|revert)(\([a-z0-9-]+\))?!?: [^ ].*$'
+          falhou=0
+          while IFS= read -r linha; do
+            sha=${linha%% *}
+            titulo=${linha#* }
+            if ! printf '%s' "$titulo" | grep -Eq "$padrao"; then
+              echo "::error::$sha fora do padrao <tipo>(<escopo>): <descricao>: $titulo"
+              falhou=1
+            elif [ ${#titulo} -gt 72 ]; then
+              echo "::error::$sha tem ${#titulo} caracteres na primeira linha (maximo 72): $titulo"
+              falhou=1
+            fi
+          done < <(git log --no-merges --format='%h %s' "$BASE..$HEAD")
+          exit $falhou
