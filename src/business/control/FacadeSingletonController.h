@@ -8,6 +8,7 @@
 #include "../command/ContarEntidadesComando.h"
 #include "../command/InvocadorComandos.h"
 #include "../log/ILogger.h"
+#include "../memento/HistoricoEdicaoPersonagem.h"
 #include "../model/Personagem.h"
 #include "../model/Usuario.h"
 #include "../repository/IAcessoRepositorio.h"
@@ -36,7 +37,8 @@ public:
     FacadeSingletonController& operator=(const FacadeSingletonController&) = delete;
 
     // Liga os controles aos repositorios escolhidos. Chamar de novo troca
-    // os repositorios (usado pelos testes) e volta ao logger nulo.
+    // os repositorios (usado pelos testes), volta ao logger nulo e esquece
+    // a ultima edicao de ficha.
     // O relogio do registro de acessos pode ser trocado nos testes.
     void inicializar(IUsuarioRepositorio& usuarios, IPersonagemRepositorio& personagens,
                      IAcessoRepositorio& acessos,
@@ -96,5 +98,7 @@ private:
     std::unique_ptr<ControleLogin> controleLogin_;
     std::unique_ptr<ControleRelatorioAcessos> controleRelatorio_;
     InvocadorComandos invocador_;
+    // Caretaker do Memento (ADR-0009): a ultima edicao de ficha, para desfazer.
+    HistoricoEdicaoPersonagem historicoEdicao_;
     ILogger* logger_ = nullptr;
 };
