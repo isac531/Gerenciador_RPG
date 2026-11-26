@@ -4,7 +4,8 @@
 
 #include "../business/control/FacadeSingletonController.h"
 
-// Submenu de console do CRUD de personagens (UC07, UC12, UC13, UC14).
+// Submenu de console do CRUD de personagens (UC07, UC12, UC13, UC14) e do
+// desfazer da ultima edicao de ficha (UC17).
 class MenuPersonagens {
 public:
     explicit MenuPersonagens(FacadeSingletonController& fachada);
@@ -17,6 +18,7 @@ private:
     bool criar();
     bool editar();
     bool excluir();
+    void desfazerEdicao();
     void listar() const;
 
     // Le nome, nivel, pontos de vida e atributos. std::nullopt se algum
