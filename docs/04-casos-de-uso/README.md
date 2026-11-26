@@ -15,9 +15,11 @@ Dois tipos de usuário, **Mestre** e **Jogador**, especializam o ator **Usuário
 
 ## 6.2 Diagrama de casos de uso completo
 
-Todos os casos de uso do sistema, com os requisitos funcionais de cada um (RF01 a RF14). Os casos de uso de campanhas ainda não têm requisitos detalhados (ver visão §2.3 e o [cronograma](../00-entregas.md)). Fonte: [`img/casos-de-uso-completo.svg`](img/casos-de-uso-completo.svg). Versão original da Sprint 1: [`../diagramas/CasosDeUso-geral.pdf`](../diagramas/CasosDeUso-geral.pdf).
+Todos os casos de uso do sistema, com os requisitos funcionais de cada um (RF01 a RF15). Os casos de uso de campanhas ainda não têm requisitos detalhados (ver visão §2.3 e o [cronograma](../00-entregas.md)). Fonte: [`img/casos-de-uso-completo.svg`](img/casos-de-uso-completo.svg). Versão original da Sprint 1: [`../diagramas/CasosDeUso-geral.pdf`](../diagramas/CasosDeUso-geral.pdf).
 
 ![Diagrama de casos de uso completo](img/casos-de-uso-completo.png)
+
+> Na Sprint 5 entrou o UC17 Desfazer edição da ficha (RF15), que estende o UC12 Editar ficha: volta o personagem à ficha anterior à última edição (padrão Memento). Descrição em [UC17](UC17-desfazer-edicao-ficha.md).
 
 > Na Sprint 4 entrou o UC16 Gerar relatório de acessos (RF14). O UC02 Fazer login passou a registrar cada tentativa (RF13), que alimenta o relatório. Descrição em [UC16](UC16-gerar-relatorio-acessos.md).
 
@@ -43,5 +45,6 @@ Todos os casos de uso do sistema, com os requisitos funcionais de cada um (RF01 
 | UC14 Excluir personagem | Usuário | RF11, NF-CON-01 | — |
 | UC15 Consultar quantidade de entidades | Usuário | RF12 | — |
 | UC16 Gerar relatório de acessos | Usuário | RF14, RF13, RF05 | [UC16](UC16-gerar-relatorio-acessos.md) |
+| UC17 Desfazer edição da ficha (estende UC12) | Usuário | RF15, RF10, RF05, NF-CON-01 | [UC17](UC17-desfazer-edicao-ficha.md) |
 
 **Regra:** depois da primeira entrega, IDs de casos de uso **não** são renumerados nem reaproveitados.

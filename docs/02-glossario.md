@@ -12,6 +12,7 @@
 | **Campanha** | Conjunto de sessões de jogo conduzidas por um Mestre, com uma história contínua e um número máximo de Jogadores. | mesa, aventura, partida | "A Mina Perdida de Phandelver", até 5 jogadores |
 | **Classe de armadura (CA)** | Valor que uma rolagem de ataque precisa igualar ou superar para acertar o personagem. | defesa, armadura | CA 15 |
 | **Classe de dificuldade (CD)** | Valor que um teste precisa igualar ou superar para ter sucesso; definido pelo Mestre. | dificuldade, alvo | CD 12 para escalar o muro |
+| **Desfazer edição** | Voltar a ficha de um personagem ao estado anterior à última edição feita na execução atual (RF15). Só a última edição pode ser desfeita. | undo, voltar | Nível 4 → desfazer → nível 3 |
 | **Dado** | Dado de jogo identificado pela letra D e pelo número de faces. Tipos aceitos: D4, D6, D8, D10, D12, D20 e D100. | — | D20 |
 | **Escudo do Mestre** | Área do sistema visível apenas ao Mestre, com anotações, NPCs e rolagens ocultas da campanha. | painel do mestre | — |
 | **Ficha** | Conjunto de dados de um personagem: nome, nível, atributos, pontos de vida e demais valores de jogo. | planilha, sheet | — |
