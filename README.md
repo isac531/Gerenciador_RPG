@@ -32,7 +32,7 @@ Escolha o armazenamento:
 - **Memória:** os dados ficam em coleções em RAM e se perdem ao fechar o programa.
 - **Arquivo binário:** os dados são carregados de `usuarios.dat`, `personagens.dat` e `acessos.dat` (na pasta de onde o programa é executado) e cada alteração é gravada na hora. Falhas de leitura ou gravação são tratadas e informadas sem encerrar o programa (NF-CON-01).
 
-No menu principal é possível cadastrar, listar e excluir usuários (o ID é gerado pelo sistema), abrir o menu de **personagens** (criar, listar, editar a ficha e excluir) consultar a **quantidade de entidades cadastradas**, **entrar com login e senha** (cada tentativa fica registrada) e gerar o **relatório de acessos** em HTML ou PDF (`relatorio-acessos.html` / `.pdf`). Toda a interface passa pela fachada única `FacadeSingletonController` (Facade + Singleton), que executa cada caso de uso como um comando (Command). Os eventos (cadastros, logins, exclusões, falhas) são registrados em `rpg.log`.
+No menu principal é possível cadastrar, listar e excluir usuários (o ID é gerado pelo sistema), abrir o menu de **personagens** (criar, listar, editar a ficha, desfazer a última edição da ficha e excluir) consultar a **quantidade de entidades cadastradas**, **entrar com login e senha** (cada tentativa fica registrada) e gerar o **relatório de acessos** em HTML ou PDF (`relatorio-acessos.html` / `.pdf`). Toda a interface passa pela fachada única `FacadeSingletonController` (Facade + Singleton), que executa cada caso de uso como um comando (Command); o desfazer da edição usa o padrão Memento. Os eventos (cadastros, logins, exclusões, falhas) são registrados em `rpg.log`.
 
 As senhas são gravadas sem criptografia no arquivo; não use senhas reais.
 

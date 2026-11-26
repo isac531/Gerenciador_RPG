@@ -16,7 +16,8 @@ src/
 │   ├── exception/            ← exceções de negócio: Login/Senha/FichaInvalida, CredenciaisInvalidas, IdInvalidoException, FalhaArmazenamentoException
 │   ├── repository/           ← interfaces IUsuarioRepositorio, IPersonagemRepositorio e IAcessoRepositorio (Repository), FabricaRepositorio (AbstractFactory), enum TipoArmazenamento
 │   ├── report/               ← Template Method: GeradorRelatorioAcessos, RelatorioHtml, RelatorioPdf, EstatisticasAcesso, FormatoRelatorio
-│   ├── command/              ← Command: IComando, ComandoComResultado, InvocadorComandos e um comando por caso de uso (CriarContaComando, FazerLoginComando, ExcluirUsuarioComando, CriarPersonagemComando, ...)
+│   ├── command/              ← Command: IComando, ComandoComResultado, InvocadorComandos e um comando por caso de uso (CriarContaComando, FazerLoginComando, ExcluirUsuarioComando, CriarPersonagemComando, DesfazerEdicaoPersonagemComando, ...)
+│   ├── memento/              ← Memento: MementoPersonagem (Memento) e HistoricoEdicaoPersonagem (Caretaker); o Originator é o Personagem, em model/
 │   └── log/                  ← ILogger (Target do Adapter) e LoggerNulo
 └── infra/                    ← repositórios em memória e em arquivo binário, ArquivoBinario, fábricas concretas (FabricaMemoria, FabricaArquivoBinario), EscolhaFabrica e LogCAdapter
     └── externo/logc/         ← biblioteca de terceiros rxi/log.c (Adaptee), sem alterações
@@ -29,7 +30,11 @@ test/                         ← um teste por cenário das regras (make test)
 
 ### Estado atual: Sprint 5 (S5.3)
 
-A Sprint 5 muda **o interior da fachada**: cada caso de uso passa a ser um comando (padrão **Command**, [ADR-0008](07-arquitetura/adr/0008-fachada-command.md)). A `FacadeSingletonController` continua sendo Facade e Singleton, com os mesmos métodos públicos, e agora também é o *Client* do Command: monta o comando com os controles e o entrega ao `InvocadorComandos` (*Invoker*), que o executa e trata a falha de armazenamento. Os controles são os *Receivers*. Nenhuma classe da `ui` mudou. O restante do sistema (repositórios, fábricas, relatórios e adaptador de log) está no diagrama da Sprint 4 abaixo; o Memento da S5.2 entra num ADR e num diagrama próprios.
+A Sprint 5 muda **o interior da fachada**: cada caso de uso passa a ser um comando (padrão **Command**, [ADR-0008](07-arquitetura/adr/0008-fachada-command.md)), e a última edição da ficha do personagem pode ser desfeita com o padrão **Memento** ([ADR-0009](07-arquitetura/adr/0009-memento-desfazer-edicao.md)). O diagrama foi dividido em dois para continuar legível; os estereótipos indicam o papel de cada classe no padrão. O restante do sistema (repositórios, fábricas, relatórios e adaptador de log) está no diagrama da Sprint 4 abaixo e não mudou.
+
+#### a) Fachada com Command (S5.1)
+
+A `FacadeSingletonController` continua sendo Facade e Singleton, com os mesmos métodos públicos de antes e um novo, `desfazerUltimaEdicao()`. Agora ela também é o *Client* do Command: monta o comando com os controles e o entrega ao `InvocadorComandos` (*Invoker*), que o executa e trata a falha de armazenamento. Os controles são os *Receivers*. Versão em imagem: [`diagramas/DiagramaClasses-projeto-S5-command.png`](diagramas/DiagramaClasses-projeto-S5-command.png).
 
 ```mermaid
 classDiagram
@@ -58,6 +63,7 @@ classDiagram
             +excluirPersonagem(id) bool
             +buscarPersonagem(id) optional~Personagem~
             +listarPersonagens() vector~Personagem~
+            +desfazerUltimaEdicao() optional~Personagem~
             +obterQuantidadeEntidades() size_t
         }
         class InvocadorComandos {
@@ -106,6 +112,12 @@ classDiagram
         class ContarEntidadesComando {
             <<ConcreteCommand · UC15>>
         }
+        class DesfazerEdicaoPersonagemComando {
+            <<ConcreteCommand · UC17>>
+        }
+        class HistoricoEdicaoPersonagem {
+            <<Memento: Caretaker>>
+        }
         class GerarRelatorioAcessosComando {
             <<ConcreteCommand · UC16>>
         }
@@ -153,6 +165,7 @@ classDiagram
     ComandoComResultado <|-- BuscarPersonagemComando
     ComandoComResultado <|-- ContarEntidadesComando
     ComandoComResultado <|-- GerarRelatorioAcessosComando
+    ComandoComResultado <|-- DesfazerEdicaoPersonagemComando
     CriarContaComando --> ControleCriarConta
     FazerLoginComando --> ControleLogin
     ListarUsuariosComando --> ControleUsuarios
@@ -166,6 +179,10 @@ classDiagram
     ContarEntidadesComando --> ControleUsuarios
     ContarEntidadesComando --> ControlePersonagem
     GerarRelatorioAcessosComando --> ControleRelatorioAcessos
+    DesfazerEdicaoPersonagemComando --> ControlePersonagem
+    FacadeSingletonController *-- HistoricoEdicaoPersonagem
+    EditarPersonagemComando --> HistoricoEdicaoPersonagem : guarda
+    DesfazerEdicaoPersonagemComando --> HistoricoEdicaoPersonagem : lê e descarta
 ```
 
 Os comandos também recebem o `ILogger` e registram o evento do caso de uso (conta criada, login aceito ou recusado, exclusão, ...); a senha nunca vai para o log (NF-SEG-01). A figura não repete essas setas para continuar legível.
@@ -201,6 +218,133 @@ sequenceDiagram
     I-->>F: (volta)
     F->>C: resultado()
     F-->>Menu: id
+```
+
+#### b) Desfazer a última edição com Memento (S5.2)
+
+O **Personagem** é o *Originator*: cria o memento com a ficha atual e se restaura a partir dele. O **MementoPersonagem** guarda o ID e a ficha anterior; a ficha só é lida pelo `Personagem` (`friend`), então para o resto do sistema o memento é opaco. O **HistoricoEdicaoPersonagem** é o *Caretaker*: guarda só o memento da última edição (RF15) e nunca lê o que há dentro dele. Os dois comandos que mexem no histórico ligam o Memento ao Command. Versão em imagem: [`diagramas/DiagramaClasses-projeto-S5-memento.png`](diagramas/DiagramaClasses-projeto-S5-memento.png).
+
+```mermaid
+classDiagram
+    direction TB
+
+    namespace ui {
+        class MenuPersonagens {
+            -editar() bool
+            -desfazerEdicao() void
+        }
+    }
+
+    namespace business {
+        class FacadeSingletonController {
+            <<Facade · Singleton · Client>>
+            -HistoricoEdicaoPersonagem historicoEdicao_
+            +editarPersonagem(id, ficha) void
+            +desfazerUltimaEdicao() optional~Personagem~
+        }
+        class EditarPersonagemComando {
+            <<ConcreteCommand · UC12>>
+            -int id_
+            -Ficha ficha_
+            +executar() void
+        }
+        class DesfazerEdicaoPersonagemComando {
+            <<ConcreteCommand · UC17>>
+            #executarComResultado() optional~Personagem~
+        }
+        class ControlePersonagem {
+            <<Receiver>>
+            +editarFicha(id, ficha) MementoPersonagem
+            +restaurar(memento) optional~Personagem~
+        }
+        class Personagem {
+            <<entidade · Memento: Originator>>
+            -int id_
+            -int idDono_
+            -Ficha ficha_
+            +comFicha(ficha) Personagem
+            +criarMemento() MementoPersonagem
+            +restaurar(memento) Personagem
+        }
+        class MementoPersonagem {
+            <<Memento>>
+            -int idPersonagem_
+            -Ficha ficha_
+            -MementoPersonagem(idPersonagem, ficha)
+            +getIdPersonagem() int
+        }
+        class HistoricoEdicaoPersonagem {
+            <<Memento: Caretaker>>
+            -optional~MementoPersonagem~ ultimo_
+            +guardar(memento) void
+            +ultimo() optional~MementoPersonagem~
+            +vazio() bool
+            +descartar() void
+        }
+        class Ficha {
+            <<struct>>
+        }
+        class IPersonagemRepositorio {
+            <<interface · Repository>>
+            +buscar(id) optional~Personagem~
+            +atualizar(personagem) bool
+        }
+    }
+
+    MenuPersonagens --> FacadeSingletonController
+    FacadeSingletonController *-- HistoricoEdicaoPersonagem
+    FacadeSingletonController ..> EditarPersonagemComando : monta
+    FacadeSingletonController ..> DesfazerEdicaoPersonagemComando : monta
+    EditarPersonagemComando --> ControlePersonagem
+    EditarPersonagemComando --> HistoricoEdicaoPersonagem : guarda o memento
+    DesfazerEdicaoPersonagemComando --> ControlePersonagem
+    DesfazerEdicaoPersonagemComando --> HistoricoEdicaoPersonagem : lê e descarta
+    ControlePersonagem --> IPersonagemRepositorio
+    ControlePersonagem ..> Personagem : pede memento e restauração
+    Personagem ..> MementoPersonagem : cria e lê (friend)
+    HistoricoEdicaoPersonagem o-- "0..1" MementoPersonagem
+    Personagem *-- Ficha
+    MementoPersonagem *-- Ficha : cópia anterior
+```
+
+Fluxo de uma edição seguida do desfazer (UC12 e UC17). O memento só entra no histórico depois de a edição ser aceita e gravada; se a gravação falhar ao desfazer, ele continua lá:
+
+```mermaid
+sequenceDiagram
+    participant Menu as MenuPersonagens
+    participant F as FacadeSingletonController
+    participant E as EditarPersonagemComando
+    participant D as DesfazerEdicaoPersonagemComando
+    participant C as ControlePersonagem
+    participant P as Personagem
+    participant H as HistoricoEdicaoPersonagem
+
+    Menu->>F: editarPersonagem(1, novaFicha)
+    F->>E: executar() (pelo InvocadorComandos)
+    E->>C: editarFicha(1, novaFicha)
+    C->>P: criarMemento()
+    P-->>C: memento (ficha anterior)
+    C->>C: valida e grava comFicha(novaFicha)
+    C-->>E: memento
+    E->>H: guardar(memento)
+    Note over H: substitui o memento anterior
+
+    Menu->>F: desfazerUltimaEdicao()
+    F->>D: executar() (pelo InvocadorComandos)
+    D->>H: ultimo()
+    alt há memento
+        H-->>D: memento
+        D->>C: restaurar(memento)
+        C->>P: restaurar(memento)
+        P-->>C: personagem com a ficha anterior
+        C->>C: grava no repositório
+        C-->>D: personagem restaurado
+        D->>H: descartar()
+        D-->>Menu: "Edicao desfeita. Ficha restaurada:"
+    else histórico vazio
+        H-->>D: nenhum
+        D-->>Menu: "Nenhuma edicao para desfazer."
+    end
 ```
 
 ### Sprint 4 (S4.1)
@@ -870,8 +1014,8 @@ Nos três arquivos, a gravação é feita num arquivo temporário (`.tmp`) que d
 
 | Princípio | Onde aparece |
 |---|---|
-| **S** Responsabilidade única | Um controle por grupo de casos de uso (`ControleCriarConta` UC01, `ControleUsuarios` UC03/UC04, `ControlePersonagem` UC07/UC12–UC14); a fachada só monta o comando do caso de uso e o entrega ao invocador, e cada caso de uso é um comando (a coordenação entre controles fica no comando); cada regra de validação é uma classe; a E/S binária fica em `ArquivoBinario`; a leitura do teclado fica em `ui/Console`; calcular estatísticas (`ControleRelatorioAcessos`) é separado de formatar o relatório (`GeradorRelatorioAcessos`) |
-| **O** Aberto/fechado | Nova regra = nova classe que implementa `IRegraValidacao` ou `IRegraFicha`; novo armazenamento = nova subclasse de `FabricaRepositorio`; novo formato de relatório = nova subclasse de `GeradorRelatorioAcessos`; nova biblioteca de log = novo adaptador de `ILogger`; novo caso de uso = novo comando, sem alterar os existentes (NF-MAN-01, NF-MAN-02) |
+| **S** Responsabilidade única | Um controle por grupo de casos de uso (`ControleCriarConta` UC01, `ControleUsuarios` UC03/UC04, `ControlePersonagem` UC07/UC12–UC14); a fachada só monta o comando do caso de uso e o entrega ao invocador, e cada caso de uso é um comando (a coordenação entre controles fica no comando); cada regra de validação é uma classe; a E/S binária fica em `ArquivoBinario`; a leitura do teclado fica em `ui/Console`; calcular estatísticas (`ControleRelatorioAcessos`) é separado de formatar o relatório (`GeradorRelatorioAcessos`); guardar a ficha anterior (`MementoPersonagem`) é separado de decidir quando guardá-la e descartá-la (`HistoricoEdicaoPersonagem`) |
+| **O** Aberto/fechado | Nova regra = nova classe que implementa `IRegraValidacao` ou `IRegraFicha`; novo armazenamento = nova subclasse de `FabricaRepositorio`; novo formato de relatório = nova subclasse de `GeradorRelatorioAcessos`; nova biblioteca de log = novo adaptador de `ILogger`; novo caso de uso = novo comando, sem alterar os existentes, como o desfazer da S5.2 (NF-MAN-01, NF-MAN-02) |
 | **L** Substituição de Liskov | Os repositórios em memória e em arquivo cumprem o mesmo contrato; `RepositorioPersonagemArquivoBinario` estende a versão em memória sem mudar o comportamento esperado, só acrescentando a gravação |
 | **I** Segregação de interfaces | `IRegraValidacao` e `IRegraFicha` têm um único método; a regra de ficha não depende de `Usuario`; um repositório por entidade, e `IAcessoRepositorio` só tem as operações que o histórico precisa (sem alterar nem remover) |
 | **D** Inversão de dependência | Os controles dependem das interfaces de repositório, recebidas no construtor; a `ui` depende da fachada recebida no construtor; a fachada e os comandos dependem de `ILogger`, não da biblioteca de log, e os comandos recebem os controles por referência; só `main.cpp` conhece as classes concretas de `infra` |
@@ -889,12 +1033,12 @@ Nos três arquivos, a gravação é feita num arquivo temporário (`.tmp`) que d
 | Adapter | S4 | ILogger (Target, na business), LogCAdapter (Adapter, na infra), biblioteca rxi/log.c em `infra/externo/logc` (Adaptee); LoggerNulo (Null Object) quando não há log | Registrar eventos em `rpg.log` com uma biblioteca C pronta sem que a business dependa dela; trocar de biblioteca = novo adaptador | [ADR-0006](07-arquitetura/adr/0006-adapter-log.md) |
 | Template Method | S4 | GeradorRelatorioAcessos (classe abstrata; `gerar()` é o método-template, não virtual), RelatorioHtml e RelatorioPdf (subclasses concretas), `textoRodape()` (gancho) | Gerar o relatório de acessos em HTML e PDF com as mesmas seções, na mesma ordem; formato novo = nova subclasse | [ADR-0007](07-arquitetura/adr/0007-relatorios-template-method.md) |
 | Null Object | S4 | LoggerNulo (implementa ILogger sem fazer nada) | A fachada funciona sem logger definido (testes) sem espalhar `if (logger != nullptr)` | [ADR-0006](07-arquitetura/adr/0006-adapter-log.md) |
-| Command | S5 | IComando (Command), ComandoComResultado e os 11 comandos de `business/command`, como CriarContaComando e FazerLoginComando (ConcreteCommand), InvocadorComandos (Invoker), ControleCriarConta, ControleLogin, ControleUsuarios, ControlePersonagem e ControleRelatorioAcessos (Receiver), FacadeSingletonController (Client) | Tirar da fachada a lógica, o log e o tratamento de falha de cada caso de uso: ela só monta o comando e o invocador o executa; caso de uso novo = comando novo, e o `IComando` serve de base para o desfazer da S5.2 | [ADR-0008](07-arquitetura/adr/0008-fachada-command.md) |
-| Memento | S5 | | | |
+| Command | S5 | IComando (Command), ComandoComResultado e os 12 comandos de `business/command`, como CriarContaComando e FazerLoginComando (ConcreteCommand), InvocadorComandos (Invoker), ControleCriarConta, ControleLogin, ControleUsuarios, ControlePersonagem e ControleRelatorioAcessos (Receiver), FacadeSingletonController (Client) | Tirar da fachada a lógica, o log e o tratamento de falha de cada caso de uso: ela só monta o comando e o invocador o executa; caso de uso novo = comando novo, como o `DesfazerEdicaoPersonagemComando` do desfazer (S5.2) | [ADR-0008](07-arquitetura/adr/0008-fachada-command.md) |
+| Memento | S5 | Personagem (Originator: `criarMemento()` e `restaurar()`), MementoPersonagem (Memento, estado privado lido só pelo Personagem), HistoricoEdicaoPersonagem (Caretaker, guarda só a última edição); EditarPersonagemComando guarda o memento e DesfazerEdicaoPersonagemComando o usa | Desfazer a última edição da ficha (RF15) sem que a fachada, os comandos ou a `ui` conheçam o estado guardado, e sem mudar o repositório | [ADR-0009](07-arquitetura/adr/0009-memento-desfazer-edicao.md) |
 
 ## 5. Rastreabilidade requisito → código → teste
 
-Testes em `test/testes.cpp`, `test/testes_personagem.cpp`, `test/testes_fachada.cpp`, `test/testes_fabrica.cpp`, `test/testes_acesso.cpp`, `test/testes_login.cpp`, `test/testes_log.cpp`, `test/testes_relatorio.cpp` e `test/testes_comando.cpp` (`cd src && make test`).
+Testes em `test/testes.cpp`, `test/testes_personagem.cpp`, `test/testes_fachada.cpp`, `test/testes_fabrica.cpp`, `test/testes_acesso.cpp`, `test/testes_login.cpp`, `test/testes_log.cpp`, `test/testes_relatorio.cpp`, `test/testes_comando.cpp`, `test/testes_memento.cpp` e `test/testes_desfazer.cpp` (`cd src && make test`).
 
 | Requisito | Classes | Testes | Situação |
 |---|---|---|---|
@@ -908,6 +1052,7 @@ Testes em `test/testes.cpp`, `test/testes_personagem.cpp`, `test/testes_fachada.
 | RF09 Listar personagens | ControlePersonagem, MenuPersonagens, calcularModificador | modificador_deve_arredondar_para_baixo, repositorio_personagem_memoria_deve_fazer_crud | Implementado |
 | RF10 Editar ficha | ControlePersonagem, Personagem::comFicha | deve_editar_ficha_mantendo_o_dono, deve_recusar_edicao_com_ficha_invalida_sem_alterar, editar_personagem_inexistente_deve_lancar_id_invalido, editar_ficha_deve_manter_id_e_dono | Implementado |
 | RF11 Excluir personagem | ControlePersonagem | deve_excluir_personagem | Implementado |
+| RF15 Desfazer a última edição da ficha | Personagem (Originator), MementoPersonagem, HistoricoEdicaoPersonagem, ControlePersonagem::restaurar, EditarPersonagemComando, DesfazerEdicaoPersonagemComando, FacadeSingletonController::desfazerUltimaEdicao, MenuPersonagens | restaurar_deve_voltar_a_ficha_do_memento_mantendo_id_e_dono, memento_nao_deve_mudar_quando_o_personagem_e_editado, restaurar_memento_de_outro_personagem_deve_lancar_id_invalido, historico_deve_guardar_apenas_a_ultima_edicao, editar_ficha_deve_devolver_o_memento_do_estado_anterior, restaurar_personagem_excluido_deve_retornar_vazio, restaurar_deve_persistir_no_arquivo_binario, comando_de_edicao_deve_guardar_o_memento_do_estado_anterior, edicao_recusada_nao_deve_guardar_memento, fachada_deve_desfazer_a_ultima_edicao_da_ficha, fachada_deve_desfazer_apenas_a_ultima_edicao, desfazer_sem_edicao_deve_retornar_vazio, edicao_recusada_nao_deve_substituir_a_ultima_edicao, desfazer_apos_excluir_o_personagem_nao_deve_recria_lo, falha_ao_desfazer_deve_manter_a_edicao_para_nova_tentativa, inicializar_deve_esquecer_a_ultima_edicao | Implementado |
 | RF12 Quantidade de entidades | FacadeSingletonController::obterQuantidadeEntidades, ContarEntidadesComando | fachada_deve_contar_entidades_cadastradas, fachada_deve_ser_instancia_unica | Implementado |
 | RF07 Autenticar | ControleLogin, IUsuarioRepositorio::buscarPorLogin, Usuario::fazerLogin, MenuPrincipal | deve_autenticar_com_login_e_senha_corretos, deve_recusar_senha_incorreta_sem_indicar_o_campo, deve_recusar_login_inexistente_com_a_mesma_mensagem | Parcial: autentica e informa o papel; menus por papel ficam para quando houver funções exclusivas |
 | RF13 Registrar acessos | RegistroAcesso, ControleLogin, IAcessoRepositorio e repositórios de acesso | login_aceito_deve_ser_registrado_como_sucesso, login_recusado_deve_ser_registrado_como_falha, fachada_deve_fazer_login_e_registrar_o_acesso, repositorio_acesso_memoria_deve_atribuir_ids_em_sequencia, repositorio_acesso_deve_listar_por_login, repositorio_acesso_binario_deve_persistir_entre_instancias, arquivo_de_acessos_corrompido_deve_lancar_falha_armazenamento | Implementado |
@@ -916,7 +1061,8 @@ Testes em `test/testes.cpp`, `test/testes_personagem.cpp`, `test/testes_fachada.
 | NF-SEG-02 Falha de login sem pista | CredenciaisInvalidasException, ControleLogin | deve_recusar_senha_incorreta_sem_indicar_o_campo, deve_recusar_login_inexistente_com_a_mesma_mensagem | Implementado |
 | NF-MAN-01, NF-MAN-02 | IUsuarioRepositorio, IRegraValidacao | — (verificado por revisão do projeto) | Implementado |
 | S5.1 Fachada com Command | IComando, ComandoComResultado, InvocadorComandos, os comandos de `business/command`, FacadeSingletonController | comando_nao_deve_executar_ao_ser_criado, comando_deve_guardar_o_resultado_depois_de_executado_pelo_invocador, comando_de_exclusao_deve_excluir_o_usuario_e_os_personagens_dele, comando_com_excecao_de_negocio_deve_propagar_e_nao_ter_resultado, invocador_deve_executar_qualquer_comando, invocador_deve_registrar_falha_de_armazenamento_e_relancar, invocador_nao_deve_registrar_como_falha_as_excecoes_de_negocio, fachada_deve_registrar_no_log_a_falha_de_armazenamento_ao_criar_conta (e todos os testes de `testes_fachada.cpp`, que passam sem alteração) | Implementado |
-| NF-MAN-03 Testes automatizados | test/ | 81 testes | Implementado |
+| S5.2 Memento | ver RF15 | ver RF15 | Implementado |
+| NF-MAN-03 Testes automatizados | test/ | 100 testes | Implementado |
 | NF-CON-01, NF-CON-02, NF-CON-03 | ArquivoBinario, repositórios em arquivo, FalhaArmazenamentoException | arquivo_binario_truncado_deve_lancar_falha_armazenamento, arquivo_binario_corrompido_deve_lancar_falha_armazenamento, arquivo_de_personagens_corrompido_deve_lancar_falha_armazenamento | Implementado |
 | NF-DES-01 Tempo de listagem e carga | RepositorioArquivoBinario | medição manual em 14/10/2026: carga de 10.000 usuários em ~11 ms e listagem em ~5 ms | Atendido |
 | NF-USA-01, NF-USA-03 | MenuPrincipal, Excecoes.h | — (verificado executando o programa) | Implementado |
