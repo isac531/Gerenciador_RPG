@@ -28,11 +28,12 @@ Cada caso de uso passa a ser um objeto-comando em `business/command`. A fachada 
   | `BuscarPersonagemComando` | consulta usada pelo UC12 | `ControlePersonagem` | `optional<Personagem>` |
   | `ContarEntidadesComando` | UC15 | `ControleUsuarios`, `ControlePersonagem` | `QuantidadeEntidades` |
   | `GerarRelatorioAcessosComando` | UC16 | `ControleRelatorioAcessos` | `RelatorioGerado` |
+  | `DesfazerEdicaoPersonagemComando` (S5.2, [ADR-0009](0009-memento-desfazer-edicao.md)) | UC17 | `ControlePersonagem` | `optional<Personagem>` restaurado |
 
 - **Invoker:** `InvocadorComandos::executar(comando, logger)` executa qualquer `IComando` sem conhecer o caso de uso. É o único lugar que trata `FalhaArmazenamentoException`: registra `descricaoFalha()` + motivo no log e relança. As exceções de negócio (login, senha e ficha inválidos, ID inválido) passam sem alteração e continuam sendo tratadas na `ui`.
 - **Client:** a `FacadeSingletonController` monta o comando com os controles que já possui, entrega-o ao invocador e devolve `comando.resultado()`. Cada método público ficou com duas ou três linhas.
 - **Contrato público da fachada não muda:** os mesmos métodos, parâmetros, retornos e exceções. `MenuPrincipal`, `MenuPersonagens` e `main.cpp` não foram alterados, e os 73 testes anteriores passam sem edição.
-- Regra para o futuro: caso de uso novo = comando novo em `business/command` + método novo na fachada que o monta.
+- Regra para o futuro: caso de uso novo = comando novo em `business/command` + método novo na fachada que o monta. Foi o que aconteceu no desfazer da S5.2: `DesfazerEdicaoPersonagemComando` + `desfazerUltimaEdicao()`, e o `EditarPersonagemComando` passou a receber o histórico do Memento.
 
 ## Alternativas consideradas
 
