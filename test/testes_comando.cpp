@@ -5,6 +5,7 @@
 
 #include "../src/business/command/ComandoComResultado.h"
 #include "../src/business/command/CriarContaComando.h"
+#include "../src/business/command/EditarPersonagemComando.h"
 #include "../src/business/command/ExcluirUsuarioComando.h"
 #include "../src/business/command/IComando.h"
 #include "../src/business/command/InvocadorComandos.h"
@@ -71,6 +72,12 @@ struct CenarioComando {
     ControlePersonagem controlePersonagem{personagens, usuarios};
     LoggerEspiao logger;
     InvocadorComandos invocador;
+    HistoricoEdicaoPersonagem historico;
+
+    int criarThorinNivel3() {
+        const int dono = criarConta.criarConta(Usuario("isac", kSenhaValida, Papel::MESTRE));
+        return controlePersonagem.criar(Personagem(dono, Ficha{"Thorin", 3, 27, Atributos{}}));
+    }
 };
 
 }  // namespace
@@ -116,6 +123,30 @@ TESTE(comando_com_excecao_de_negocio_deve_propagar_e_nao_ter_resultado) {
     VERIFICAR_LANCA(cenario.invocador.executar(comando, cenario.logger), SenhaInvalidaException);
     VERIFICAR_LANCA(comando.resultado(), std::logic_error);
     VERIFICAR(cenario.controleUsuarios.quantidade() == 0);
+}
+
+TESTE(comando_de_edicao_deve_guardar_o_memento_do_estado_anterior) {
+    CenarioComando cenario;
+    const int id = cenario.criarThorinNivel3();
+
+    EditarPersonagemComando comando(cenario.controlePersonagem, cenario.historico, id,
+                                    Ficha{"Thorin", 4, 35, Atributos{}}, cenario.logger);
+    cenario.invocador.executar(comando, cenario.logger);
+
+    VERIFICAR(cenario.controlePersonagem.buscar(id)->getFicha().nivel == 4);
+    VERIFICAR(cenario.historico.ultimo()->getIdPersonagem() == id);
+    cenario.controlePersonagem.restaurar(*cenario.historico.ultimo());
+    VERIFICAR(cenario.controlePersonagem.buscar(id)->getFicha().nivel == 3);
+}
+
+TESTE(edicao_recusada_nao_deve_guardar_memento) {
+    CenarioComando cenario;
+    const int id = cenario.criarThorinNivel3();
+
+    EditarPersonagemComando comando(cenario.controlePersonagem, cenario.historico, id,
+                                    Ficha{"", 4, 35, Atributos{}}, cenario.logger);
+    VERIFICAR_LANCA(cenario.invocador.executar(comando, cenario.logger), FichaInvalidaException);
+    VERIFICAR(cenario.historico.vazio());
 }
 
 // ---------- Invoker: executa qualquer comando e trata a falha de armazenamento ----------

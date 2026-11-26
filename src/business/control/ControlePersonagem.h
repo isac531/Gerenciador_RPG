@@ -5,6 +5,7 @@
 #include <optional>
 #include <vector>
 
+#include "../memento/MementoPersonagem.h"
 #include "../model/Personagem.h"
 #include "../repository/IPersonagemRepositorio.h"
 #include "../repository/IUsuarioRepositorio.h"
@@ -20,10 +21,17 @@ public:
     // (e subclasses) ou FalhaArmazenamentoException.
     int criar(const Personagem& personagem);
 
-    // Substitui a ficha do personagem `id`; o dono nao muda.
+    // Substitui a ficha do personagem `id`; o dono nao muda. Retorna o
+    // memento do estado anterior, para desfazer a edicao (RF15).
     // Lanca IdInvalidoException (personagem inexistente), FichaInvalidaException
     // ou FalhaArmazenamentoException.
-    void editarFicha(int id, const Ficha& ficha);
+    MementoPersonagem editarFicha(int id, const Ficha& ficha);
+
+    // Volta o personagem do memento a ficha guardada e grava (RF15). A
+    // ficha nao e validada de novo: ja tinha sido aceita antes. Retorna o
+    // personagem restaurado, ou std::nullopt se ele nao existe mais.
+    // Lanca FalhaArmazenamentoException.
+    std::optional<Personagem> restaurar(const MementoPersonagem& memento);
 
     // Retorna false se o ID nao existir.
     bool excluir(int id);

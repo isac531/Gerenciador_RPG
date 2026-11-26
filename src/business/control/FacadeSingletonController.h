@@ -8,6 +8,7 @@
 #include "../command/ContarEntidadesComando.h"
 #include "../command/InvocadorComandos.h"
 #include "../log/ILogger.h"
+#include "../memento/HistoricoEdicaoPersonagem.h"
 #include "../model/Personagem.h"
 #include "../model/Usuario.h"
 #include "../repository/IAcessoRepositorio.h"
@@ -36,7 +37,8 @@ public:
     FacadeSingletonController& operator=(const FacadeSingletonController&) = delete;
 
     // Liga os controles aos repositorios escolhidos. Chamar de novo troca
-    // os repositorios (usado pelos testes) e volta ao logger nulo.
+    // os repositorios (usado pelos testes), volta ao logger nulo e esquece
+    // a ultima edicao de ficha.
     // O relogio do registro de acessos pode ser trocado nos testes.
     void inicializar(IUsuarioRepositorio& usuarios, IPersonagemRepositorio& personagens,
                      IAcessoRepositorio& acessos,
@@ -64,11 +66,18 @@ public:
     RelatorioGerado gerarRelatorioAcessos(FormatoRelatorio formato) const;
 
     // ----- Personagens (UC07, UC12, UC13, UC14) -----
+    // editarPersonagem() guarda o estado anterior para desfazerUltimaEdicao().
     int criarPersonagem(const Personagem& personagem);
     void editarPersonagem(int id, const Ficha& ficha);
     bool excluirPersonagem(int id);
     std::optional<Personagem> buscarPersonagem(int id) const;
     std::vector<Personagem> listarPersonagens() const;
+
+    // ----- Desfazer a ultima edicao de ficha (UC17, RF15, Memento) -----
+    // Volta o personagem da ultima edicao a ficha anterior e retorna o
+    // personagem restaurado; std::nullopt se nao ha edicao para desfazer.
+    // So a ultima edicao pode ser desfeita.
+    std::optional<Personagem> desfazerUltimaEdicao();
 
     // ----- Quantidade de entidades cadastradas (RF12) -----
     std::size_t obterQuantidadeUsuarios() const;
@@ -96,5 +105,7 @@ private:
     std::unique_ptr<ControleLogin> controleLogin_;
     std::unique_ptr<ControleRelatorioAcessos> controleRelatorio_;
     InvocadorComandos invocador_;
+    // Caretaker do Memento (ADR-0009): a ultima edicao de ficha, para desfazer.
+    HistoricoEdicaoPersonagem historicoEdicao_;
     ILogger* logger_ = nullptr;
 };

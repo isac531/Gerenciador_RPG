@@ -15,10 +15,11 @@
 | [ADR-0006](adr/0006-adapter-log.md) | Adapter para a biblioteca de log rxi/log.c | RF07, RF13, NF-SEG-01, NF-MAN-01 |
 | [ADR-0007](adr/0007-relatorios-template-method.md) | Template Method para os relatórios de acesso em HTML e PDF | RF13, RF14, NF-MAN-01 |
 | [ADR-0008](adr/0008-fachada-command.md) | Fachada que executa os casos de uso como comandos (Command) | RF01, RF04, RF06–RF14, NF-MAN-01, NF-SEG-01 |
+| [ADR-0009](adr/0009-memento-desfazer-edicao.md) | Memento para desfazer a última edição da ficha | RF15, RF10, NF-CON-01, NF-MAN-01 |
 
 ## Arquitetura lógica (Sprint 5)
 
-Aplicação de console monolítica em C++17, em três camadas. A `ui` fala só com a fachada, e a fachada executa cada caso de uso como um comando (Command, [ADR-0008](adr/0008-fachada-command.md)). A `business` define as interfaces (repositórios, fábrica abstrata e `ILogger`), e a `infra` as implementa, inclusive o adaptador da biblioteca de log de terceiros. Só `main.cpp` (raiz de composição) conhece as três camadas.
+Aplicação de console monolítica em C++17, em três camadas. A `ui` fala só com a fachada, e a fachada executa cada caso de uso como um comando (Command, [ADR-0008](adr/0008-fachada-command.md)). A última edição da ficha pode ser desfeita com o Memento ([ADR-0009](adr/0009-memento-desfazer-edicao.md)). A `business` define as interfaces (repositórios, fábrica abstrata e `ILogger`), e a `infra` as implementa, inclusive o adaptador da biblioteca de log de terceiros. Só `main.cpp` (raiz de composição) conhece as três camadas.
 
 ```mermaid
 flowchart TB
@@ -28,6 +29,7 @@ flowchart TB
     subgraph business["business"]
         fachada["FacadeSingletonController<br/>(Facade + Singleton)"]
         comandos["command: IComando, ComandoComResultado, InvocadorComandos<br/>(Command) → um comando por caso de uso"]
+        memento["memento: MementoPersonagem, HistoricoEdicaoPersonagem<br/>(Memento; Originator: Personagem)"]
         controles["ControleCriarConta · ControleLogin · ControleUsuarios<br/>ControlePersonagem · ControleRelatorioAcessos"]
         relatorios["report: GeradorRelatorioAcessos<br/>(Template Method) → RelatorioHtml, RelatorioPdf"]
         regras["validation: regras de login, senha e ficha"]
@@ -50,6 +52,8 @@ flowchart TB
     fachada --> log
     comandos --> controles
     comandos --> log
+    comandos --> memento
+    fachada --> memento
     controles --> regras
     controles --> modelo
     controles --> contratos

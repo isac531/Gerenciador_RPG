@@ -27,13 +27,24 @@ int ControlePersonagem::criar(const Personagem& personagem) {
     return personagens_.adicionar(personagem);
 }
 
-void ControlePersonagem::editarFicha(int id, const Ficha& ficha) {
+MementoPersonagem ControlePersonagem::editarFicha(int id, const Ficha& ficha) {
     const std::optional<Personagem> atual = personagens_.buscar(id);
     if (!atual) {
         throw IdInvalidoException("Nao existe personagem com esse ID.");
     }
     validarFicha(ficha);
     personagens_.atualizar(atual->comFicha(ficha));
+    return atual->criarMemento();
+}
+
+std::optional<Personagem> ControlePersonagem::restaurar(const MementoPersonagem& memento) {
+    const std::optional<Personagem> atual = personagens_.buscar(memento.getIdPersonagem());
+    if (!atual) {
+        return std::nullopt;
+    }
+    const Personagem restaurado = atual->restaurar(memento);
+    personagens_.atualizar(restaurado);
+    return restaurado;
 }
 
 bool ControlePersonagem::excluir(int id) {

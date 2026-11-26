@@ -4,7 +4,7 @@ CC       := gcc
 CFLAGS   := -std=c99 -Wall -Wextra -g
 DIRS     := ui business/model business/control business/exception \
             business/validation business/repository business/log \
-            business/report business/command infra
+            business/report business/command business/memento infra
 LIB_SRCS := $(wildcard $(addsuffix /*.cpp,$(DIRS)))
 HDRS     := $(wildcard $(addsuffix /*.h,$(DIRS)))
 # Bibliotecas externas em C (ver infra/externo/): compiladas como C.
