@@ -126,6 +126,7 @@ docs(adr): registrar fachada unica com Singleton (ADR-0004)
 - Máximo de **72 caracteres** na primeira linha
 - Um commit = uma responsabilidade. Se precisar de "e" na descrição, considere dividir
 - Commits de trabalho em progresso devem usar `wip:` e ser squashados antes do merge
+- O CI (`.github/workflows/commits.yml`) confere o tipo, o formato `<tipo>(<escopo>): <descrição>` e os 72 caracteres de cada commit do PR (merges são ignorados). Um commit fora do padrão, como `refactor(src)/ usar ...` (barra no lugar de dois-pontos), deixa o PR vermelho: corrija com `git commit --amend` ou `git rebase -i` **antes** da revisão
 
 ---
 
@@ -273,6 +274,8 @@ Não é refactoring massivo — é renomear uma variável confusa, extrair um bl
 - [ ] Nenhum `TODO` novo sem issue associada
 - [ ] Documentação atualizada (se aplicável)
 - [ ] ADR criado (se decisão arquitetural foi tomada)
+
+**Autoria distribuída:** cada integrante abre e commita os PRs da parte que fez. Numa sprint com vários PRs, dividam os PRs entre os integrantes (um não abre todos), e o revisor é sempre outro integrante.
 
 **Tamanho:** PRs grandes são difíceis de revisar. Prefira PRs focados. Se ultrapassar ~400 linhas, justifique ou divida. PRs que dependem de outro dizem no corpo qual vem antes.
 
