@@ -15,7 +15,7 @@ Este caso de uso é responsável por atualizar a ficha de um personagem já cria
 - Dados de entrada: ID do personagem e a nova ficha (nome, nível, pontos de vida e os seis atributos).
 
 **Saídas e pós-condições**
-- Sucesso: o personagem guarda a nova ficha, com o mesmo ID e o mesmo dono.
+- Sucesso: o personagem guarda a nova ficha, com o mesmo ID e o mesmo dono. A ficha anterior fica guardada para o UC17 Desfazer edição da ficha (só a da última edição).
 - Falha: a ficha anterior continua guardada e o Usuário vê o motivo da recusa.
 
 ## Fluxo principal

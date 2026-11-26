@@ -61,6 +61,7 @@ bool MenuPersonagens::executar() {
                      "2. Listar personagens\n"
                      "3. Editar ficha\n"
                      "4. Excluir personagem\n"
+                     "5. Desfazer ultima edicao de ficha\n"
                      "0. Voltar\n";
 
         int opcao;
@@ -81,6 +82,9 @@ bool MenuPersonagens::executar() {
             break;
         case 4:
             if (!excluir()) return false;
+            break;
+        case 5:
+            desfazerEdicao();
             break;
         case 0:
             return true;
@@ -174,6 +178,20 @@ bool MenuPersonagens::excluir() {
         std::cout << "Falha no armazenamento: " << e.what() << '\n';
     }
     return true;
+}
+
+void MenuPersonagens::desfazerEdicao() {
+    try {
+        const std::optional<Personagem> restaurado = fachada_.desfazerUltimaEdicao();
+        if (!restaurado) {
+            std::cout << "Nenhuma edicao para desfazer.\n";
+            return;
+        }
+        std::cout << "Edicao desfeita. Ficha restaurada:\n";
+        exibir(*restaurado, "ID " + std::to_string(restaurado->getIdDono()));
+    } catch (const FalhaArmazenamentoException& e) {
+        std::cout << "Falha no armazenamento: " << e.what() << '\n';
+    }
 }
 
 void MenuPersonagens::listar() const {

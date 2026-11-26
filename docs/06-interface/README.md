@@ -45,7 +45,7 @@ Usuario e seus personagens excluidos com sucesso.
 
 ## TL03 — Menu de personagens e listagem
 
-Relacionada a: UC07, UC12, UC13, UC14 · RF08–RF11
+Relacionada a: UC07, UC12, UC13, UC14, UC17 · RF08–RF11, RF15
 
 ```text
 Personagens
@@ -53,6 +53,7 @@ Personagens
 2. Listar personagens
 3. Editar ficha
 4. Excluir personagem
+5. Desfazer ultima edicao de ficha
 0. Voltar
 Opcao: 2
 ID: 1 | Dono: isac | Nome: Thorin | Nivel: 3 | PV: 27
@@ -61,6 +62,14 @@ ID: 1 | Dono: isac | Nome: Thorin | Nivel: 3 | PV: 27
 Opcao: 4
 ID do personagem: 9
 Personagem nao encontrado.
+
+Opcao: 5
+Edicao desfeita. Ficha restaurada:
+ID: 1 | Dono: ID 1 | Nome: Thorin | Nivel: 3 | PV: 27
+    FOR 16 (+3) DES 12 (+1) CON 14 (+2) INT 8 (-1) SAB 10 (+0) CAR 9 (-1)
+
+Opcao: 5
+Nenhuma edicao para desfazer.
 ```
 
 ## TL04 — Criar personagem
