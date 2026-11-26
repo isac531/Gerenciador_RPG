@@ -2,6 +2,8 @@
 
 #include <utility>
 
+#include "../exception/Excecoes.h"
+
 Personagem::Personagem(int idDono, Ficha ficha)
     : Personagem(SEM_ID, idDono, std::move(ficha)) {}
 
@@ -14,6 +16,17 @@ Personagem Personagem::comId(int id) const {
 
 Personagem Personagem::comFicha(Ficha ficha) const {
     return Personagem(id_, idDono_, std::move(ficha));
+}
+
+MementoPersonagem Personagem::criarMemento() const {
+    return MementoPersonagem(id_, ficha_);
+}
+
+Personagem Personagem::restaurar(const MementoPersonagem& memento) const {
+    if (memento.idPersonagem_ != id_) {
+        throw IdInvalidoException("O memento e de outro personagem.");
+    }
+    return comFicha(memento.ficha_);
 }
 
 int Personagem::getId() const {
